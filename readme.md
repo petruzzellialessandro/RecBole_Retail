@@ -70,6 +70,16 @@ Per eseguire i modelli che utilizzano la gerarchia si deve creare
 prepare un file di embedding “pre-appresi”. Per farlo, eseguire tutte le
 cella del notebook `prepare_embedding.ipynb`. Al termine nella cartella
 `RECEIPT_LINES` sarò salvato il file `RECEIPT_LINES.ent` composto da due
-colonne. Il codice identificato del file e l’embedding relativo. Per
-addestrare i modelli che utilizzano questa informazione eseguire le
+colonne. Il codice identificato del file e l’embedding relativo. La
+prima cella del file `prepare_embedding.ipynb` permette di modificare
+alcuni parametri del processo di otteniment degli emebdding:
+
+- `HIERARCHY_MAX_LEN`: Numero di prodotti da considerare nella
+  gerarchia. Gli esperimenti effettuati hanno considerato 3 elementi
+- `EMBEDDING_SIZE`: Grandezza degli emebeddi da ottenere. 64 negli
+  scorsi esperimenti
+- `MERGE_METHOD`: Metodo di merge degli emebedding dei singoli elementi
+  della gerarchia. Può essere *sum* o *mean*
+
+Per addestrare i modelli che utilizzano questa informazione eseguire le
 celle del file `Models_Train_Test.ipynb` nella cartella `model_type_2`.
