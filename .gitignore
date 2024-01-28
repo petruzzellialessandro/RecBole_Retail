@@ -7,3 +7,4 @@ raw_data/lines_hier.pkl
 raw_data/products.pkl
 RECEIPT_LINES/RECEIPT_LINES.inter
 RECEIPT_LINES/RECEIPT_LINES.item
+RECEIPT_LINES/RECEIPT_LINES.ent
