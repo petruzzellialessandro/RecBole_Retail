@@ -14,7 +14,7 @@ Q_AMOUNT_FIELD: Q_AMOUNT
 Q_DISCOUNT_AMOUNT_FIELD: Q_DISCOUNT_AMOUNT
 TIME_FIELD: TS_T_RECEIPT
 USER_ID_FIELD: Key_receipt
-data_path: ..\
+data_path: .
 dataset: RECEIPT_LINES
 dropout_prob: 0.3
 embedding_size: 64
@@ -57,5 +57,3 @@ topk: [1, 10, 50, 100]
 train_batch_size: 4096
 train_neg_sample_args: null
 valid_metric: MRR@10
-
-
