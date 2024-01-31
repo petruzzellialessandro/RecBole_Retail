@@ -37,16 +37,11 @@ load_col:
   - Q_AMOUNT
   - Q_DISCOUNT_AMOUNT
   - Key_product
-  item:
-  - D_PRODUCT
-  - K_PRODUCT_TYPE
+  item: 
   - Key_product
-  itememb: 
-  - item_id
   - item_emb
-  alias_of_item_id: "item_id"
   preload_weight: 
-  - "item_id": "item_emb"
+  - Key_product: item_emb
 loss_type: CE
 metrics:
 - Recall
@@ -62,6 +57,5 @@ topk: [1, 10, 50, 100]
 train_batch_size: 4096
 train_neg_sample_args: null
 valid_metric: MRR@10
-additional_feat_suffix: [ent]
 
 
