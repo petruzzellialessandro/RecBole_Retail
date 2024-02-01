@@ -15,8 +15,6 @@ strutturato nel seguente modo:
 - `raw_data`: In questa cartella ci sono i dati grezzi, non ancora
   processati per essere utilizzati dalla libreria. **Inserire in questa
   cartella i file `lines_hier.pkl` e `products.pkl`**
-- `RECEIPT_LINES`: Cartella contente i dati che la libreria utilizza per
-  addestrare e testare i modelli
 - `model_type_1`: All’interno di questa cartella è presente il notebook
   per addestrare ed eseguire i modelli. Qui verranno create le cartelle
   per il salvataggio dei modelli e dei risultati sul test set.
@@ -25,8 +23,7 @@ strutturato nel seguente modo:
   cartella `model_type_1` (ed è giusto così, cambia il file di
   configurazione). Il secondo contiene le celle da eseguire per ottenere
   gli embedding a partire dalla gerarchia e salvare il file nel formato
-  utilizzato dalla liberia. Il file sarà salvato nella cartella
-  `RECEIPT_LINES` con estensione `.ent`.
+  utilizzato dalla liberia.
 
 # File importanti
 
@@ -44,19 +41,16 @@ strutturato nel seguente modo:
 
 Dopo aver salvato nella cartella `raw_data` i file `lines_hier.pkl` e
 `products.pkl`, eseguire tutte le celle del notebook
-`dataset_creation.ipynb`. Al termine all’iterno della cartella
-`RECEIPT_LINES` dovrebbero esser stati generati due file:
+`dataset_creation.ipynb`. Al termine all’iterno delle cartelle
+`model_type_1` e `model_type_2` saranno create `RECEIPT_LINES`
+dovrebbero esser generati i seguenti file file:
 
 - `RECEIPT_LINES.inter`: file che modella i singoli acquisti con tutte
-  le proprietà dello scontrino
+  le proprietà dello scontrino in entrambe le cartelle
 - `RECEIPT_LINES.item`: file che modella i singoli prodotti con le loro
-  proprietà (compresa la gerarchia)
+  proprietà (compresa la gerarchia) solo nella cartella `model_type_1`
 
 ## Modelli che non utilizzano la gerarchia
-
-**NB**: Sebbene presenti nei file `RECEIPT_LINES.item` e
-`RECEIPT_LINES.item`, i modelli ignorano i campi “attributi” sia degli
-acquisti che dei prodotti.
 
 Per eseguire i modelli che non utilizzano gli attributi eseguire le
 celle presenti nel file `Models_Train_Test.ipynb` nella cartella
@@ -69,10 +63,11 @@ nella cartella `results` con il nome `{nome_modello}_test.json`.
 Per eseguire i modelli che utilizzano la gerarchia si deve creare
 prepare un file di embedding “pre-appresi”. Per farlo, eseguire tutte le
 cella del notebook `prepare_embedding.ipynb`. Al termine nella cartella
-`RECEIPT_LINES` sarò salvato il file `RECEIPT_LINES.ent` composto da due
-colonne. Il codice identificato del file e l’embedding relativo. La
-prima cella del file `prepare_embedding.ipynb` permette di modificare
-alcuni parametri del processo di otteniment degli emebdding:
+`RECEIPT_LINES` presente in `model_type_1` sarà salvato il file
+`RECEIPT_LINES.item` composto da due colonne. Il codice identificato del
+file e l’embedding relativo. La prima cella del file
+`prepare_embedding.ipynb` permette di modificare alcuni parametri del
+processo di otteniment degli emebdding:
 
 - `HIERARCHY_MAX_LEN`: Numero di prodotti da considerare nella
   gerarchia. Gli esperimenti effettuati hanno considerato 3 elementi
