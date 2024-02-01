@@ -1,7 +1,5 @@
 # Retail RecBole
 
-# Retail RecBole
-
 ## Preliminaries
 
 Creare un env python nuovo e installare i requirements
