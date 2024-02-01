@@ -3,6 +3,7 @@ reproducibility': True
 field_separator: "\t"
 D_PRODUCT_FIELD: D_PRODUCT
 device: cuda:0
+NEG_PREFIX: ''
 ITEM_ID_FIELD: Key_product
 K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
 Key_receipt_FIELD: Key_receipt

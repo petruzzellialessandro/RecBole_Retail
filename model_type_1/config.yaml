@@ -3,6 +3,7 @@ reproducibility': True
 field_separator: "\t"
 D_PRODUCT_FIELD: D_PRODUCT
 device: cuda:0
+NEG_PREFIX: ''
 ITEM_ID_FIELD: Key_product
 K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
 Key_receipt_FIELD: Key_receipt
@@ -14,11 +15,11 @@ Q_AMOUNT_FIELD: Q_AMOUNT
 Q_DISCOUNT_AMOUNT_FIELD: Q_DISCOUNT_AMOUNT
 TIME_FIELD: TS_T_RECEIPT
 USER_ID_FIELD: Key_receipt
-data_path: ..\
+data_path: .
 dataset: RECEIPT_LINES
 dropout_prob: 0.3
 embedding_size: 64
-epochs: 50
+epochs: 1   
 eval_args:
   group_by: Key_receipt
   mode: full
@@ -57,4 +58,5 @@ topk: [1, 10, 50, 100]
 train_batch_size: 4096
 train_neg_sample_args: null
 valid_metric: MRR@10
+neg_sampling: ~
 
