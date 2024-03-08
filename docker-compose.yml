@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: "redis"
+    container_name: "redis"
+    ports:
+      - "6379:6379"
+    restart: always
+    command:
+      - "--save 60 1"
+      - "--loglevel warning"
+    volumes:
+      - /data/redis:/data
+
+  backend:
+    container_name: "backend"
+    build: ./src/app/backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+
+  frontend:
+    container_name: "frontend"
+    build: ./src/app/frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src/app/frontend:/app/frontend
+
+

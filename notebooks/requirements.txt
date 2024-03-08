@@ -1,0 +1,12 @@
+gensim==4.3.2
+ipython==8.12.3
+langdetect==1.0.9
+nltk==3.8.1
+numpy==1.24.1
+openai==1.12.0
+pandas==2.2.1
+PyYAML==6.0.1
+PyYAML==6.0.1
+recbole==1.2.0
+scikit_learn==1.4.0
+torch==2.2.0+cu118

@@ -1,0 +1,17 @@
+celery==5.3.6
+fastapi==0.109.2
+gensim==4.3.2
+ipython==8.12.3
+langdetect==1.0.9
+nltk==3.8.1
+numpy==1.24.1
+openai==1.13.3
+pandas==2.2.1
+pydantic==2.6.3
+python-multipart==0.0.9
+PyYAML==6.0.1
+recbole==1.2.0
+ray==2.9.1
+scikit_learn==1.4.0
+starlette==0.36.3
+uvicorn==0.27.1

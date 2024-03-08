@@ -1,0 +1,64 @@
+seed: 42 
+reproducibility': True
+field_separator: "\t"
+D_PRODUCT_FIELD: D_PRODUCT
+device: cuda:0
+NEG_PREFIX: ''
+ITEM_ID_FIELD: Key_product
+K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
+Key_receipt_FIELD: Key_receipt
+LINE_NUM_FIELD: LINE_NUM
+LIST_SUFFIX: _list
+MAX_ITEM_LIST_LENGTH: 7
+QUANTITY_FIELD: QUANTITY
+Q_AMOUNT_FIELD: Q_AMOUNT
+Q_DISCOUNT_AMOUNT_FIELD: Q_DISCOUNT_AMOUNT
+TIME_FIELD: TS_T_RECEIPT
+USER_ID_FIELD: Key_receipt
+data_path: "../data/processed/type_1"
+checkpoint_dir: "../models/type_1"
+log_dir: "../reports/type_1/logs"
+dataset: RECEIPT_LINES
+dropout_prob: 0.3
+embedding_size: 64
+epochs: 1   
+eval_args:
+  group_by: Key_receipt
+  mode: full
+  order: TO
+  split:
+    LS: valid_and_test
+eval_batch_size: 1024
+hidden_size: 128
+load_col:
+  inter:
+  - K_MEMBER
+  - TS_T_RECEIPT
+  - LINE_NUM
+  - Key_receipt
+  - QUANTITY
+  - Q_AMOUNT
+  - Q_DISCOUNT_AMOUNT
+  - Key_product
+  item:
+  - D_PRODUCT
+  - K_PRODUCT_TYPE
+  - Key_product
+  - hierachy
+loss_type: CE
+metrics:
+- Recall
+- MRR
+- NDCG
+- Hit
+- Precision
+- AveragePopularity
+- TailPercentage
+- ItemCoverage
+num_layers: 1
+topk: [1, 10, 50, 100]
+train_batch_size: 4096
+train_neg_sample_args: null
+valid_metric: MRR@10
+neg_sampling: ~
+

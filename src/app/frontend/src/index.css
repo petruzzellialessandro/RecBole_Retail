@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  @apply h-lvh;
+  width: 80%;
+  margin: auto;
+  overflow: hidden;
+}
+
+h1, h3 {
+  @apply text-primary-500;
+}
+
+h1 {
+  @apply text-3xl;
+}
+
+h3 {
+  @apply text-xl;
+}
+
+input[type = "file"] {
+  @apply opacity-0 absolute;
+}
+
+*:hover {
+  & label {
+    @apply hover:text-accent-700 hover:border-accent-700;
+  };
+  & .select-model__control, label, input[type="text"], input[type="number"], input[type="password"]{
+    @apply hover:border-accent-700;
+  }
+
+}
+
+.select-model__control, input, label {
+  @apply h-10 border-solid border-[1px] border-gray-300;
+}
+
+.select-model__control
+.select-model__value-container,
+.select-model__input-container,
+.select-model__indicators-container {
+  @apply py-0 m-0 !important;
+}
+
+.select-model__placeholder, label {
+  @apply text-slate-400;
+}
+
+input, label {  
+  padding: .4em;
+  border-radius: 5px;
+}
+
+section {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
