@@ -19,7 +19,7 @@ data_path: "data/processed/type_2"
 checkpoint_dir: "models/type_2"
 log_dir: "reports/type_2/logs"
 save_dataset: True
-dataset_save_path: "data/processed/type_2"
+dataset_save_path: "data/processed/type_2/RECEIPT_LINES.pth"
 dataset: RECEIPT_LINES
 dropout_prob: 0.3
 embedding_size: 64
@@ -60,6 +60,5 @@ metrics:
 num_layers: 1
 topk: [1, 10, 50, 100]
 train_batch_size: 1024
-train_neg_sample_args: 
-  uniform: 1
+train_neg_sample_args: null
 valid_metric: MRR@10

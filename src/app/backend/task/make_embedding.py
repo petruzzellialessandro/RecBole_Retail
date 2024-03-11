@@ -8,8 +8,8 @@ import numpy as np
 
 class MakeEmbedding:
     def __init__(self, raw_data_path=None, processed_data_path=None):
-        self.raw_data_path = raw_data_path or os.path.join(os.path.dirname(os.getcwd()), "data", "raw")
-        self.processed_data_path = processed_data_path or os.path.join(os.path.dirname(os.getcwd()), "data", "processed")
+        self.raw_data_path = raw_data_path or os.path.join(os.getcwd(), "data", "raw")
+        self.processed_data_path = processed_data_path or os.path.join(os.getcwd(), "data", "processed")
 
     def create_embedding(self):
         HIERARCHY_MAX_LEN = 4
@@ -75,7 +75,7 @@ class MakeEmbedding:
             'tensor_string': 'item_emb:float_seq'
         })
 
-        df.to_csv(os.path.join(embedding_creator.processed_data_path, "RECEIPT_LINES", "RECEIPT_LINES.item"), sep="\t", index=False)
+        df.to_csv(os.path.join(self.processed_data_path, "RECEIPT_LINES", "RECEIPT_LINES.item"), sep="\t", index=False)
 
         return df
 

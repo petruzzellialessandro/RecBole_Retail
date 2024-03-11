@@ -48,7 +48,7 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
             className='flex-grow'
             required
             autoComplete='username'
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value.trim())}
           />
           <input
             type="password"
@@ -57,7 +57,7 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
             className='flex-grow'
             required
             autoComplete='current-password'
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value.trim())}
           />
           <CustomSelect onSelected={setSelectedOption} options={MODELS} />
           <button className={btnClass} type="submit">Train</button>

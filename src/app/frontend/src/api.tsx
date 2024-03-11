@@ -65,23 +65,6 @@ export const checkTaskStatus = async (task: string, taskId: string) => {
   return fetchData(url);
 };
 
-// export const checkTaskStatus = async (task: string, taskId: string): Promise<any> => {
-//   const checkStatus = async (resolve: any, reject: any) => {
-//     try {
-//       const response = await fetchData(`${BACKEND_URL}/${task}/task-status/${taskId}`);
-//       if (response.status === TaskStatus.SUCCESS || response.status === TaskStatus.FAILED) {
-//         resolve(response);
-//       } else {
-//         setTimeout(() => checkStatus(resolve, reject), 5000);
-//       }
-//     } catch (error) {
-//       reject(error);
-//     }
-//   };
-
-//   return new Promise(checkStatus);
-// };
-
 export const fetchTaskResult = async (task: string, taskId: string) => {
   const url = `${BACKEND_URL}/${task}/task-result/${taskId}`;
   return fetchData(url);

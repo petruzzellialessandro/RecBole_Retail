@@ -34,7 +34,7 @@ export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
     const formData = new FormData();
     formData.append('model', selectedOption);
     formData.append('k', k);
-    formData.append('user_id', userID);
+    formData.append('user_token', userID);
     formData.append('file', file);
 
     try {
@@ -51,8 +51,8 @@ export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
     <section>
       <h2>Request User Recommendation</h2>
       <form onSubmit={handlePredictionSubmit}>
-        <input placeholder="User ID" type="text" name="user_id" required className='flex-grow' onChange={(e) => setUserID(e.target.value)} />
-        <input placeholder='K' type="number" min="1" name="k" required className='w-32' onChange={(e) => setK(e.target.value)} />
+        <input placeholder="User token" type="text" name="user_id" required className='flex-grow' onChange={(e) => setUserID(e.target.value.trim())} />
+        <input placeholder='K' type="number" min="1" name="k" required className='w-32' onChange={(e) => setK(e.target.value.trim())} />
         <InputFile onFileSelect={(f) => setFile(f)} />
         <CustomSelect onSelected={setSelectedOption} options={MODELS} />
         <button type="submit" className={btnClass}>Send</button>

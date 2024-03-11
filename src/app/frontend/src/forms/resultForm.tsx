@@ -35,7 +35,7 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
                     type="text"
                     placeholder="Enter task ID"
                     value={taskId}
-                    onChange={(e) => setTaskId(e.target.value)}
+                    onChange={(e) => setTaskId(e.target.value.trim())}
                     required
                     className='flex-grow'
                 />

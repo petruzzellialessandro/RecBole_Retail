@@ -21,7 +21,7 @@ const InputFile: React.FC<InputFileProps> = ({ onFileSelect }) => {
         <label className='flex-grow relative cursor-pointer'>
             <input type="file" name="file" className='w-full top-0 left-0 absolute opacity-0 cursor-pointer' onChange={onSelected} required />
             <FontAwesomeIcon icon={faCloudArrowUp} className='mr-2'/>
-            {fileName ? `File: ${fileName}` : 'File'} 
+            {fileName ? `File: ${fileName}` : 'Products tokens file'} 
         </label>
     );
 };

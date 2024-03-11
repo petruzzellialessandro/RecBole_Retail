@@ -21,10 +21,10 @@ def root():
     return {"message": "Welcome to RecBole Retail Recommender System! Please, read the `/docs`!"}
 
 @main.post("/predict", tags=["Prediction"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
-async def start_predict_task(user_id: str = Form(...), k: int = Form(10), file: UploadFile = File(...), model: str = Form(...)):
+async def start_predict_task(user_token: str = Form(...), k: int = Form(10), file: UploadFile = File(...), model: str = Form(...)):
     """ Predict model endpoint used to get the recommendations for the user."""	
     shopping_cart_items = await read_list_from_csv(file)
-    task = predict_task.delay(model, k, user_id, shopping_cart_items)
+    task = predict_task.delay(model, k, user_token, shopping_cart_items)
     return {
         "status": TaskStatus.STARTED,
         "task_id": task.id

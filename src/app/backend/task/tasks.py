@@ -27,7 +27,8 @@ def evaluate_task(self, model_name: str, test_set: list[str]) -> dict[str, str]:
 
 @app.task(bind=True, name="train_task", track_started=True)
 def train_task(self, model_name: str) -> dict[str, str]:
-    MakeEmbedding.create_embedding()
+    # embedding_creator = MakeEmbedding()
+    # embedding_creator.create_embedding()
     # MakeDescriptionEmbedding.create_description_embedding()
     start_training(model_name)
     response = {
