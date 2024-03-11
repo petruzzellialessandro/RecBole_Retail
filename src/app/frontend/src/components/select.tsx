@@ -8,17 +8,17 @@ interface ModelSelectProps {
   placeholder?: string;
 }
 
-const ModelSelect: React.FC<ModelSelectProps> = ({ onSelected, options, placeholder }) => {
+const CustomSelect: React.FC<ModelSelectProps> = ({ onSelected, options, placeholder }) => {
   return (
     <Select
         classNamePrefix="select-model"
-        className='min-w-52 flex-grow'
+        className='w-80'
         options={options}
-        placeholder= { placeholder ? placeholder : 'Select a model' }
+        placeholder= { placeholder ? placeholder : 'Model' }
         onChange={(option) => onSelected(option ? option.value : '')}
         required
     />
   );
 };
 
-export default ModelSelect;
+export default CustomSelect;

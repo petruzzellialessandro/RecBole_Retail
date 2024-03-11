@@ -9,7 +9,7 @@ import {
 } from '../api';
 import { BtnProps } from '../App';
 
-import ModelSelect from '../components/modelSelect';
+import CustomSelect from '../components/select';
 import InputFile from '../components/inputFile';
 
 export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
@@ -48,7 +48,7 @@ export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
       <h2>Evaluate Performance Metrics</h2>
       <form onSubmit={handleEvaluationSubmit}>
         <InputFile onFileSelect={(f) => setFile(f)} />
-        <ModelSelect onSelected={setSelectedOption} options={MODELS} />
+        <CustomSelect onSelected={setSelectedOption} options={MODELS} />
         <button type="submit" className={btnClass}>Evaluate</button>
       </form>
       {taskID && (

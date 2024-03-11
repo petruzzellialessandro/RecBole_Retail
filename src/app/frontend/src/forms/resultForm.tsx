@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { fetchTaskResult, TASK_TYPES } from '../api'; // Assicurati che il percorso sia corretto
-import ModelSelect from '../components/modelSelect';
+import { fetchTaskResult, renderResult, TASK_TYPES } from '../api';
 import { BtnProps } from '../App';
+import CustomSelect from '../components/select';
 
 export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
     const [taskId, setTaskId] = useState('');
@@ -11,8 +11,8 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!taskId) {
-            setErrorMessage('Please enter a task ID.');
+        if (!taskId || !selectedOption) {
+            setErrorMessage('Please select a task type and enter a task ID.');
             return;
         }
 
@@ -30,7 +30,7 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
         <section>
             <h2>Fetch Task Result</h2>
             <form onSubmit={handleSubmit}>
-                <ModelSelect onSelected={setSelectedOption} options={TASK_TYPES} placeholder='Select a task'/>
+                <CustomSelect onSelected={setSelectedOption} options={TASK_TYPES} placeholder='Select a Task Type'/>
                 <input
                     type="text"
                     placeholder="Enter task ID"
@@ -41,7 +41,19 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
                 />
                 <button className={btnClass} type="submit">Fetch</button>
             </form>
-            {taskResult && <div><h3>Result:</h3><pre>{JSON.stringify(taskResult, null, 2)}</pre></div>}
+            {taskResult && (
+                <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
+                    <div className='col-span-2 font-bold text-lg'>Task ID:</div>
+                    <div className='col-span-7'>{taskResult.task_id}</div>
+
+                    <div className='col-span-2 font-bold text-lg'>Task Status:</div>
+                    <div className='col-span-7'>{taskResult.status}</div>
+
+                    <div className='col-span-2 font-bold text-lg'>Result:</div>
+                    <div className='col-span-7'>{taskResult.result ? renderResult(taskResult.result) : 'No result available.'}</div>
+                </div>
+
+            )}
             {errorMessage && <div>{errorMessage}</div>}
         </section>
     );

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { sendTrainingRequest, handleCheckResult, TaskType, getStatusLink, BaseResponse, MODELS } from '../api';
 import { BtnProps } from '../App';
 
-import ModelSelect from '../components/modelSelect';
+import CustomSelect from '../components/select';
 
 export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [username, setUsername] = useState<string>('');
@@ -59,7 +59,7 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
             autoComplete='current-password'
             onChange={(e) => setPassword(e.target.value)}
           />
-          <ModelSelect onSelected={setSelectedOption} options={MODELS} />
+          <CustomSelect onSelected={setSelectedOption} options={MODELS} />
           <button className={btnClass} type="submit">Train</button>
       </form>
       {taskID && (

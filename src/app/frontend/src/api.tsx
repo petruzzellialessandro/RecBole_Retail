@@ -139,10 +139,36 @@ export const handleCheckResult = async (
       case TaskStatus.FAILED:
         setErrorMessage('Task failed.');
         break;
-      // default:
-      //   setErrorMessage('Status unknown: ' + statusResponse.status);
+      default:
+        setErrorMessage('Status unknown.');
     }
   } catch (error) {
     setErrorMessage(`Failed to fetch task result: ${error}`);
+  }
+};
+
+export const renderResult = (result: boolean | [] | {}) => {
+  if (Array.isArray(result)) {
+      return (
+          <div>
+              <ul>
+                  {result.map((item, index) => (
+                      <li key={index}>{item}</li>
+                  ))}
+              </ul>
+          </div>
+      );
+  } else if (typeof result === 'object' && result !== null) {
+      return (
+          <div>
+              <ul>
+                  {Object.entries(result).map(([key, value]) => (
+                      <li key={key}>{`${key}: ${value}`}</li>
+                  ))}
+              </ul>
+          </div>
+      );
+  } else {
+      return <div>{result.toString()}</div>;
   }
 };

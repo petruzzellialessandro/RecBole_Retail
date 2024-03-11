@@ -8,4 +8,7 @@ app = Celery("celery_task", broker=BROKER_URI, backend=BACKEND_URI, include=["ta
 
 app.conf.update(
     broker_connection_retry_on_startup=True,
+    task_track_started=True,
+    result_backend=BACKEND_URI
+
 )

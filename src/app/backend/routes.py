@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from fastapi import HTTPException, Form, File, UploadFile, APIRouter, Response
-from schemas import TaskStatus, TaskStatusResponse, TaskType, PredictResponse, EvaluateResponse, TrainResponse
+from schemas import TaskNotFoundResponse, TaskStatus, TaskStatusResponse, TaskType, PredictResponse, EvaluateResponse, TrainResponse
 import os
 from task.tasks import predict_task, evaluate_task, train_task
 from celery.result import AsyncResult
@@ -59,24 +59,26 @@ async def check_task_status(task_type: TaskType, task_id: str):
         "task_id": task_id
     }
     
-@main.get("/{task_type}/task-result/{task_id}", tags=["Results"], status_code=HTTPStatus.OK, response_model=Union[PredictResponse, EvaluateResponse, TrainResponse], response_class=JSONResponse)
+@main.get("/{task_type}/task-result/{task_id}", tags=["Results"], status_code=HTTPStatus.OK, response_model=Union[TaskNotFoundResponse, PredictResponse, EvaluateResponse, TrainResponse], response_class=JSONResponse)
 async def get_task_result(task_type: TaskType, task_id: str):
     task = AsyncResult(task_id, app=celery_app)
-    if task.status == "SUCCESS":
-        result = {
-            "status": TaskStatus.SUCCESS,
+
+    if task.state == "PENDING":
+        return TaskNotFoundResponse(status=TaskStatus.UNKNOWN, task_id=task_id, result='Task not started or not existing')    
+    else:
+        response = {
+            "status": task.state,
             "task_id": task_id,
             "result": task.result
         }
-        
+            
         match task_type:
             case TaskType.PREDICT:
-                return PredictResponse(**result)
+                response =  PredictResponse(**response)
             case TaskType.EVALUATE:
-                return EvaluateResponse(**result)
+                response =  EvaluateResponse(**response)
             case TaskType.TRAIN:
-                return TrainResponse(**result)
+                response =  TrainResponse(**response)
             case _:
-                raise HTTPException(status_code=400, detail="Invalid task type")
-    else:
-         return TaskStatusResponse(status=TaskStatus.PENDING, task_id=task_id)
+                response = TaskStatusResponse(status=TaskStatus.UNKNOWN, task_id=task_id)
+        return response
