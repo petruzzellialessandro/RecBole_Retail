@@ -1,24 +1,20 @@
 import React from 'react';
 import Select from 'react-select';
-
-const models = [
-  { value: 'Bert4Rec', label: 'Bert4Rec' },
-  { value: 'Caser', label: 'Caser' },
-  { value: 'GRU4Rec', label: 'GRU4Rec' },
-  { value: 'TransRec', label: 'TransRec' },
-];
+import { Option } from '../api';
 
 interface ModelSelectProps {
   onSelected: (selectedValue: string) => void;
+  options: Option[];
+  placeholder?: string;
 }
 
-const ModelSelect: React.FC<ModelSelectProps> = ({ onSelected }) => {
+const ModelSelect: React.FC<ModelSelectProps> = ({ onSelected, options, placeholder }) => {
   return (
     <Select
         classNamePrefix="select-model"
         className='min-w-52 flex-grow'
-        options={models}
-        placeholder="Select a model"
+        options={options}
+        placeholder= { placeholder ? placeholder : 'Select a model' }
         onChange={(option) => onSelected(option ? option.value : '')}
         required
     />

@@ -12,6 +12,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+form {
+  @apply flex flex-wrap gap-y-3 2xl:flex-nowrap gap-x-3 items-center;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

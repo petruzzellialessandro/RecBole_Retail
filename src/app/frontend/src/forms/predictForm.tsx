@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
-import { sendPredictionRequest, checkTaskStatus, fetchTaskResult } from '../api';
+import {
+  sendPredictionRequest,
+  handleCheckResult,
+  TaskType,
+  PredictResponse,
+  MODELS
+} from '../api';
 import { BtnProps } from '../App';
+
 import InputFile from '../components/inputFile';
-import ModelSelect from '../components/select';
+import ModelSelect from '../components/modelSelect';
 
 export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [userID, setUserID] = useState<string>('');
   const [k, setK] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<string>('');
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | null>(null);
   const [taskID, setTaskID] = useState<string>('');
-  const [taskResult, setTaskResult] = useState<string | null>(null);
-  const TASK = 'predict';
-
+  const [taskResult, setTaskResult] = useState<PredictResponse | null>(null);
+  const TASK = TaskType.PREDICT;
 
   const handlePredictionSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -25,59 +31,41 @@ export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
     }
 
     const formData = new FormData();
-    formData.set('model', selectedOption);
-    formData.set('k', k);
-    formData.set('user_id', userID);
-    formData.set('file', file as Blob);
-    
+    formData.append('model', selectedOption);
+    formData.append('k', k);
+    formData.append('user_id', userID);
+    formData.append('file', file);
+
     try {
       const taskResponse = await sendPredictionRequest(formData);
       setTaskID(taskResponse.task_id);
       setTaskResult(null);
-      handleCheckResult(taskResponse.task_id);
+      handleCheckResult(taskResponse.task_id, setErrorMessage, setTaskResult, TASK);
     } catch (error) {
       setErrorMessage(`Failed to send recommendation request: ${error}`);
     }
   };
 
-  const handleCheckResult = async (taskId: string) => {
-    try {
-      const statusResponse = await checkTaskStatus(TASK, taskId);
-      if (statusResponse === 'completed') {
-        const result = await fetchTaskResult(TASK, taskId); 
-        setTaskResult(JSON.stringify(result));
-      } else if (statusResponse.status === 'failed') {
-        setErrorMessage('Task failed.');
-      } else {
-        setErrorMessage('Task is not completed yet.');
-      }
-    } catch (error) {
-      setErrorMessage(`Failed to fetch task result: ${error}`);
-    }
-  };
-
-  const taskStatusLink = taskID ? `http://localhost:8000/${TASK}/task-status/${taskID}` : '';
-
   return (
     <section>
       <h2>Request User Recommendation</h2>
-      <form onSubmit={handlePredictionSubmit} className='flex flex-wrap gap-y-3 2xl:flex-nowrap 2xl: gap-x-3 items-center'>
-        <input placeholder="User ID" type="text" name="user_id" required  className='flex-grow' onChange={(e) => setUserID(e.target.value)} />
-        <input placeholder='N.Recommendations' type="number" name="k" required  className='flex-grow' onChange={(e) => setK(e.target.value)} />
-        <InputFile onFileSelect={setFile} />
-        <ModelSelect onSelected={setSelectedOption} />
+      <form onSubmit={handlePredictionSubmit}>
+        <input placeholder="User ID" type="text" name="user_id" required className='flex-grow' onChange={(e) => setUserID(e.target.value)} />
+        <input placeholder='N.Recommendations' type="number" min="1" name="k" required className='flex-grow' onChange={(e) => setK(e.target.value)} />
+        <InputFile onFileSelect={(f) => setFile(f)} />
+        <ModelSelect onSelected={setSelectedOption} options={MODELS} />
         <button type="submit" className={btnClass}>Send</button>
       </form>
       {taskID && (
         <div>
-          Task ID: <a href={taskStatusLink} target="_blank" rel="noopener noreferrer" className='underline'>{taskID}</a>
           <p>
-            <button onClick={() => handleCheckResult(taskID)} className="text-accent-700 hover:underline">Check Result</button>
+            <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline">Check Result</button>
           </p>
+          Task ID: {taskID}
         </div>
       )}
-      {taskResult && <div>Result: {taskResult}</div>}
-      {errorMessage && <div>{errorMessage}</div>}
+      {taskResult && <div>Result: {JSON.stringify(taskResult.result)}</div>}
+      {errorMessage && !taskResult && <div>{errorMessage}</div>}
     </section>
   );
 };

@@ -2,7 +2,7 @@ seed: 42
 reproducibility': True
 field_separator: "\t"
 D_PRODUCT_FIELD: D_PRODUCT
-
+device: cuda[0]
 NEG_PREFIX: ''
 ITEM_ID_FIELD: Key_product
 K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
@@ -60,5 +60,6 @@ metrics:
 num_layers: 1
 topk: [1, 10, 50, 100]
 train_batch_size: 1024
-train_neg_sample_args: null
+train_neg_sample_args: 
+  uniform: 1
 valid_metric: MRR@10

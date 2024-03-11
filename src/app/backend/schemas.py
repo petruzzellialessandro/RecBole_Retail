@@ -1,26 +1,32 @@
+from typing import List
 from pydantic import BaseModel
 from enum import Enum
 
-class Interaction(BaseModel):
-    Key_product: str
-
-class StartTaskResponse(BaseModel):
-    task_id: str
-
 class TaskType(str, Enum):
-    predict = "predict"
-    train = "train"
-    evaluate = "evaluate"
+    PREDICT = "predict"
+    TRAIN = "train"
+    EVALUATE = "evaluate"
 
-class StatusResponse(BaseModel):
+class TaskStatus(Enum):
+    PENDING = 'PENDING'
+    STARTED = 'STARTED'
+    RETRY = 'RETRY'
+    FAILURE = 'FAILURE'
+    SUCCESS = 'SUCCESS'
+
+class TaskStatusResponse(BaseModel):
     status: str
     task_id: str
 
-class PredictResponse(StatusResponse):
-    result: list = []
+class PredictResponse(BaseModel):
+    status: str
+    task_id: str
+    result: List[str] = []
 
-class EvaluateResponse(StatusResponse):
-    result: list = []
+class EvaluateResponse(BaseModel):
+    status: str
+    result: dict = {}
 
-class TrainResponse(StatusResponse):
+class TrainResponse(BaseModel):
+    status: str
     result: bool

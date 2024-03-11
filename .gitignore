@@ -16,3 +16,4 @@ models/
 !src/models
 reports
 __pycache__
+.DS_Store

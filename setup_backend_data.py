@@ -16,13 +16,13 @@ def copy_directory_contents(src, dst):
 
 if __name__ == '__main__':
     ROOT_DIR = os.getcwd()
-    BACKEND_DIR = os.path.join(ROOT_DIR, "src","app","backend")
+    BACKEND_DIR = os.path.join(ROOT_DIR, "src", "app", "backend")
 
-    print(f"Setup project files...")
+    print(f"Starting project setup...")
     DATA_DIR = os.path.join(ROOT_DIR, "data")
     DATA_DIR_BACKEND = os.path.join(BACKEND_DIR, "data")
     print(f"Copying files from {DATA_DIR} to {DATA_DIR_BACKEND} directory")
     copy_directory_contents(DATA_DIR, DATA_DIR_BACKEND)
 
-    print(f"Setup project files completed!")
+    print(f"Task completed!")
         

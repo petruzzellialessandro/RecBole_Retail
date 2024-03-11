@@ -1,6 +1,37 @@
-import os
-import re
 from datetime import datetime
+from fastapi import HTTPException, UploadFile
+import csv
+import io
+import os
+import pandas as pd
+import re
+import torch
+
+def make_interaction_df(config, dataset, user_token: str, item_tokens: list[str]) -> pd.DataFrame:
+    """ Create the interaction dataframe."""
+
+    user_id = dataset.token2id(field="K_MEMBER", tokens=user_token)
+    item_ids = [dataset.token2id(field="Key_product", tokens=token) for token in item_tokens]
+
+    max_length = config['MAX_ITEM_LIST_LENGTH']
+    padded_item_ids = item_ids + [0] * (max_length - len(item_ids))
+    input_inter = {
+        'user_id': torch.tensor([user_id]),
+        'Key_product_list': torch.tensor([padded_item_ids]),
+        'item_length': torch.tensor([len(item_ids)]),
+    }
+    return input_inter
+
+async def read_list_from_csv(file: UploadFile) -> list:
+    """ Read the file and return the list of values."""
+    try:
+        contents = await file.read()
+        decoded_contents = io.StringIO(contents.decode('utf-8'))
+        csv_reader = csv.reader(decoded_contents, delimiter='\t')
+        
+        return [row[0] for row in csv_reader]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 def find_latest_model(directory: str, prefix: str) -> str:
     regex_pattern = rf"{prefix}-([A-Za-z]+)-(\d+)-(\d+)_(\d+)-(\d+)-(\d+)\.pth"

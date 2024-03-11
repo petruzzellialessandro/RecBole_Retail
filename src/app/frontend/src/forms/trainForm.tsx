@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { sendTrainingRequest, checkTaskStatus, fetchTaskResult  } from '../api';
+import { sendTrainingRequest, handleCheckResult, TaskType, getStatusLink, BaseResponse, MODELS } from '../api';
 import { BtnProps } from '../App';
-import ModelSelect from '../components/select';
+
+import ModelSelect from '../components/modelSelect';
 
 export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [trainingResponse, setTrainingResponse] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [taskID, setTaskID] = useState<string>('');
-  const [taskResult, setTaskResult] = useState<string | null>(null);
-  const TASK = 'train';
+  const [taskResult, setTaskResult] = useState<BaseResponse | null>(null);
+  const TASK = TaskType.TRAIN;
 
   const handleTrainingSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,49 +23,31 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
     }
 
     const formData = new FormData();
-    formData.set('username', username);
-    formData.set('password', password);
-    formData.set('model', selectedOption);
+    formData.append('username', username);
+    formData.append('password', password);
+    formData.append('model', selectedOption);
 
     try {
       const taskResponse = await sendTrainingRequest(formData);
       setTaskID(taskResponse.task_id);
       setTaskResult(null);
-      handleCheckResult(taskResponse.task_id);
+      handleCheckResult(taskResponse.task_id, setErrorMessage, setTaskResult, TASK);
     } catch (error) {
-      setErrorMessage(`Failed to send recommendation request: ${error}`);
+      setErrorMessage(`Failed to send training request: ${error}`);
     }
   };
-
-  const handleCheckResult = async (taskId: string) => {
-    try {
-      const statusResponse = await checkTaskStatus(TASK, taskId);
-      if (statusResponse === 'completed') {
-        const result = await fetchTaskResult(TASK, taskId); 
-        setTaskResult(JSON.stringify(result));
-      } else if (statusResponse.status === 'failed') {
-        setErrorMessage('Task failed.');
-      } else {
-        setErrorMessage('Task is not completed yet.');
-      }
-    } catch (error) {
-      setErrorMessage(`Failed to fetch task result: ${error}`);
-    }
-  };
-
-  const taskStatusLink = taskID ? `http://localhost:8000/${TASK}/task-status/${taskID}` : '';
 
   return (
     <section>
       <h2>Start Training</h2>
-      <form onSubmit={handleTrainingSubmit} className='flex flex-wrap gap-y-3 2xl:flex-nowrap 2xl: gap-x-3 items-center'>
+      <form onSubmit={handleTrainingSubmit}>
           <input
             type="text"
             placeholder='Admin username'
             name="username"
             className='flex-grow'
             required
-            autoComplete='true'
+            autoComplete='username'
             onChange={(e) => setUsername(e.target.value)}
           />
           <input
@@ -74,22 +56,22 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
             name="password"
             className='flex-grow'
             required
-            autoComplete='true'
+            autoComplete='current-password'
             onChange={(e) => setPassword(e.target.value)}
           />
-          <ModelSelect onSelected={setSelectedOption} />
+          <ModelSelect onSelected={setSelectedOption} options={MODELS} />
           <button className={btnClass} type="submit">Train</button>
       </form>
       {taskID && (
         <div>
-          Task ID: <a href={taskStatusLink} target="_blank" rel="noopener noreferrer" className='underline'>{taskID}</a>
+          Task ID: <a href={getStatusLink(TASK, taskID)} target="_blank" rel="noopener noreferrer" className='underline'>{taskID}</a>
           <p>
-            <button onClick={() => handleCheckResult(taskID)} className="text-accent-700 hover:underline">Check Result</button>
+            <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline">Check Result</button>
           </p>
         </div>
       )}
-      {taskResult && <div>Result: {taskResult}</div>}
-      {errorMessage && <div>{errorMessage}</div>}
+      {taskResult && <div>Result: {taskResult.toString()}</div>}
+      {errorMessage && !taskResult && <div>{errorMessage}</div>}
     </section>
   );
 };

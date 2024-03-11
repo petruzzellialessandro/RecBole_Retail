@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { ResultForm } from './forms/resultForm';
 import { PredictForm } from './forms/predictForm';
 import { EvaluateForm } from './forms/evaluateForm';
 import { TrainForm } from './forms/trainForm';
@@ -26,6 +27,7 @@ const App: React.FC = () => {
           <img src={`${process.env.PUBLIC_URL}/logo.png`} alt="RecBole" className="flex flex-grow" />
         </div>
       </div>
+      <ResultForm btnClass={btnClass} />
       <PredictForm btnClass={btnClass} />
       <EvaluateForm btnClass={btnClass} />
       <TrainForm btnClass={btnClass} />

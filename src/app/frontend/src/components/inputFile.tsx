@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler } from 'react';
+import React, { useState, ChangeEventHandler } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowUp } from "@fortawesome/free-solid-svg-icons";
 
@@ -7,18 +7,26 @@ interface InputFileProps {
 }
 
 const InputFile: React.FC<InputFileProps> = ({ onFileSelect }) => {
+    const [fileName, setFileName] = useState<string | null>(null); // Aggiungi uno stato per tenere traccia del nome del file
+
     const onSelected: ChangeEventHandler<HTMLInputElement> = (event) => {
         if (event.target.files && event.target.files.length > 0) {
-          onFileSelect(event.target.files[0]);
+            const selectedFile = event.target.files[0];
+            onFileSelect(selectedFile);
+            setFileName(selectedFile.name); // Aggiorna lo stato con il nome del file selezionato
         }
-      };
+    };
       
     return (
-    <label className='flex-grow relative'>
-    <input type="file" name="file" className='w-full top-0 left-0 flex-grow' onChange={onSelected} required />
-    <FontAwesomeIcon icon={faCloudArrowUp} className=''/> Upload file
-  </label>
-  );
+    <>
+        <label className='flex-grow relative cursor-pointer'>
+            <input type="file" name="file" className='w-full top-0 left-0 absolute opacity-0 cursor-pointer' onChange={onSelected} required />
+            <FontAwesomeIcon icon={faCloudArrowUp} className='mr-2'/>
+            {fileName ? `File: ${fileName}` : 'Upload file'} 
+        </label>
+        
+    </>
+    );
 };
 
 export default InputFile;

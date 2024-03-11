@@ -1,4 +1,6 @@
-version: '3.8'
+# networks:
+#   my_network:
+#     driver: bridge
 
 services:
 
@@ -12,7 +14,9 @@ services:
       - "--save 60 1"
       - "--loglevel warning"
     volumes:
-      - /data/redis:/data
+      - ./data/redis:/data
+    # networks:
+    #   - my_network
 
   backend:
     container_name: "backend"
@@ -22,10 +26,12 @@ services:
       - "8000:8000"
     depends_on:
       - redis
-    volumes:
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./reports:/app/reports
+    # volumes:
+      # - ./data:/app/data
+      # - ./reports:/app/reports
+    # networks:
+    #   - my_network
+
 
   frontend:
     container_name: "frontend"
@@ -34,5 +40,8 @@ services:
       - "3000:3000"
     volumes:
       - ./src/app/frontend:/app/frontend
+    # networks:
+    #   - my_network
+
 
 
