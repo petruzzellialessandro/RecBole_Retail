@@ -2,7 +2,6 @@ from recbole.quick_start import load_data_and_model
 from task.utils import find_latest_model, make_interaction_df
 import os
 import torch
-import numpy as np
 
 def get_top_k_recommendations(model_path: str, k: int, user_token: str, item_tokens: list[str]) -> list[int]:
     config, model, dataset, _, _, _ = load_data_and_model(model_file=model_path)

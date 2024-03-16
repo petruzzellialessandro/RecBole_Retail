@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import {
   sendPredictionRequest,
   handleCheckResult,
-  TaskType,
-  PredictResponse,
-  MODELS,
   renderResult
 } from '../api';
 import { BtnProps } from '../App';
 
 import InputFile from '../components/inputFile';
 import CustomSelect from '../components/select';
+import { PredictResponse, MODELS, TaskType } from '../models';
 
 export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [userID, setUserID] = useState<string>('');
@@ -53,28 +51,27 @@ export const PredictForm: React.FC<BtnProps> = ({ btnClass }) => {
       <form onSubmit={handlePredictionSubmit}>
         <input placeholder="User token" type="text" name="user_id" required className='flex-grow' onChange={(e) => setUserID(e.target.value.trim())} />
         <input placeholder='K' type="number" min="1" name="k" required className='w-32' onChange={(e) => setK(e.target.value.trim())} />
-        <InputFile onFileSelect={(f) => setFile(f)} />
+        <InputFile placeholder="Products tokens file" onFileSelect={(f) => setFile(f)} />
         <CustomSelect onSelected={setSelectedOption} options={MODELS} />
         <button type="submit" className={btnClass}>Send</button>
       </form>
       {taskID && (
-        <div>
-          <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline text-2xl font-bold py-5 px-3">Check Result</button>
           <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
             <div className='col-span-2 font-bold text-lg'>Task ID:</div>
-                <div className='col-span-7'>{taskID}</div>
-            </div>
+            <div className='col-span-7'>{taskID}</div>
           </div>
       )}
+      {taskID && !taskResult && (
+        <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline text-2xl font-bold p-3">Check Result</button>       
+      )}
       {taskResult && (
-          <div className='px-3 pb-3 grid grid-cols-9 gap-x-4 gap-y-2'>
+          <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
               <div className='col-span-2 font-bold text-lg'>Task Status:</div>
               <div className='col-span-7'>{taskResult.status}</div>
 
               <div className='col-span-2 font-bold text-lg'>Result:</div>
               <div className='col-span-7'>{taskResult.result ? renderResult(taskResult.result) : 'No result available.'}</div>
           </div>
-
       )}
       {errorMessage && !taskResult && <div className='p-3 font-bold'>{errorMessage}</div>}
     </section>

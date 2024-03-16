@@ -1,6 +1,6 @@
 import React from 'react';
 import Select from 'react-select';
-import { Option } from '../api';
+import { Option } from '../models';
 
 interface ModelSelectProps {
   onSelected: (selectedValue: string) => void;

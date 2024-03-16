@@ -2,12 +2,16 @@ import os
 import pandas as pd
 
 class MakeDataset:
-    def __init__(self, raw_data_path=None, processed_data_path=None):
-        self.raw_data_path = raw_data_path or os.path.join(os.path.dirname(os.getcwd()), "data", "raw")
-        self.processed_data_path = processed_data_path or os.path.join(os.path.dirname(os.getcwd()), "data", "processed")
+    def __init__(self, data=None):
+        self.raw_data_path = os.path.join(os.getcwd(), "data", "raw")
+        self.processed_data_path = os.path.join(os.getcwd(), "data", "processed")
+        self.data = data
+        self.name = "RECEIPT_LINES_TEST" if self.data else "RECEIPT_LINES"
+        self.dataset_path = None
 
-    def create_atomic_file(self):
-        data = pd.read_pickle(os.path.join(self.raw_data_path, 'lines_hier.pkl'))
+    def create_dataset_file(self):
+        source_path = self.data if self.data else os.path.join(self.raw_data_path, 'lines_hier.pkl')
+        data = pd.read_pickle(source_path)
         data['DT_T_RECEIPT'] = data['T_RECEIPT'].astype('datetime64[s]')
         data['TS_T_RECEIPT'] = data['DT_T_RECEIPT'].apply(lambda x: x.timestamp())
 
@@ -30,17 +34,20 @@ class MakeDataset:
                                      'hierarchy': 'hierarchy:token_seq'})
         item = item.drop_duplicates("Key_product:token").reset_index(drop=True)
 
-        out_dir_type_1 = os.path.join(self.processed_data_path, 'type_1', 'RECEIPT_LINES')
+        out_dir_type_1 = os.path.join(self.processed_data_path, 'type_1', self.name)
         if not os.path.exists(out_dir_type_1):
             os.makedirs(out_dir_type_1)
-        item.to_csv(os.path.join(out_dir_type_1, 'RECEIPT_LINES.item'), sep='\t', index=False)
-        inter.to_csv(os.path.join(out_dir_type_1, 'RECEIPT_LINES.inter'), sep='\t', index=False)
+        item.to_csv(os.path.join(out_dir_type_1, f'{self.name}.item'), sep='\t', index=False)
+        inter.to_csv(os.path.join(out_dir_type_1, f'{self.name}.inter'), sep='\t', index=False)
 
-        out_dir_type_2 = os.path.join(self.processed_data_path, 'type_2', 'RECEIPT_LINES')
+        out_dir_type_2 = os.path.join(self.processed_data_path, 'type_2', self.name)
         if not os.path.exists(out_dir_type_2):
             os.makedirs(out_dir_type_2)
-        inter.to_csv(os.path.join(out_dir_type_2, 'RECEIPT_LINES.inter'), sep='\t', index=False)
 
-if __name__ == '__main__':
-    dataset_creator = MakeDataset()
-    dataset_creator.create_atomic_file()
+        self.dataset_path = os.path.join(out_dir_type_2, f'{self.name}.inter')
+        inter.to_csv(self.dataset_path, sep='\t', index=False)
+        print(f"Dataset file created at {self.dataset_path}")
+
+# if __name__ == '__main__':
+#     dataset_creator = MakeDataset()
+#     dataset_creator.create_dataset_file()

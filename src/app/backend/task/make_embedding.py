@@ -11,7 +11,7 @@ class MakeEmbedding:
         self.raw_data_path = raw_data_path or os.path.join(os.getcwd(), "data", "raw")
         self.processed_data_path = processed_data_path or os.path.join(os.getcwd(), "data", "processed")
 
-    def create_embedding(self):
+    def create_embedding(self, file_name="RECEIPT_LINES"):
         HIERARCHY_MAX_LEN = 4
         EMBEDDING_SIZE = 64
         MERGE_METHOD = "sum"
@@ -74,9 +74,11 @@ class MakeEmbedding:
             'Key_product':'Key_product:token',
             'tensor_string': 'item_emb:float_seq'
         })
-
-        df.to_csv(os.path.join(self.processed_data_path, "RECEIPT_LINES", "RECEIPT_LINES.item"), sep="\t", index=False)
-
+        target_dir = os.path.join(self.processed_data_path, "type_2", file_name)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        df.to_csv(os.path.join(target_dir, f"{file_name}.item"), sep="\t", index=False)
+        print(f"Embedding created and saved at: {os.path.join(target_dir, f'{file_name}.item')}")
         return df
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { sendTrainingRequest, handleCheckResult, TaskType, getStatusLink, BaseResponse, MODELS } from '../api';
+import { sendTrainingRequest, handleCheckResult, getStatusLink } from '../api';
 import { BtnProps } from '../App';
-
 import CustomSelect from '../components/select';
+import { BaseResponse, MODELS, TaskType } from '../models';
 
 export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [username, setUsername] = useState<string>('');

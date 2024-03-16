@@ -1,14 +1,14 @@
-from http import HTTPStatus
-from fastapi import HTTPException, Form, File, UploadFile, APIRouter, Response
-from schemas import TaskNotFoundResponse, TaskStatus, TaskStatusResponse, TaskType, PredictResponse, EvaluateResponse, TrainResponse
-import os
-from task.tasks import predict_task, evaluate_task, train_task
 from celery.result import AsyncResult
-from task.worker import app as celery_app
-from task.utils import read_list_from_csv
+from fastapi import HTTPException, Form, File, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
-
+from http import HTTPStatus
+from schemas import TaskNotFoundResponse, TaskStatus, TaskStatusResponse, TaskType, PredictResponse, EvaluateResponse, TrainResponse
+from task.make_dataset import MakeDataset
+from task.tasks import predict_task, evaluate_task, train_task
+from task.utils import save_raw_data, read_list_from_csv
+from task.worker import app as celery_app
 from typing import Union
+import os
 
 TRAIN_USER = os.getenv("TRAIN_USERNAME", "admin")
 TRAIN_PASS = os.getenv("TRAIN_PASSWORD", "admin")
@@ -23,20 +23,22 @@ def root():
 @main.post("/predict", tags=["Prediction"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
 async def start_predict_task(user_token: str = Form(...), k: int = Form(10), file: UploadFile = File(...), model: str = Form(...)):
     """ Predict model endpoint used to get the recommendations for the user."""	
-    shopping_cart_items = await read_list_from_csv(file)
-    task = predict_task.delay(model, k, user_token, shopping_cart_items)
+    item_tokens = await read_list_from_csv(file)
+    task = predict_task.delay(model, k, user_token, item_tokens)
     return {
-        "status": TaskStatus.STARTED,
+        "status": task.status,
         "task_id": task.id
     }
 
 @main.post("/evaluate", tags=["Evaluate"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
-async def start_predict_task(model: str = Form(...), file: UploadFile = File(...)):
+async def start_evaluate_task(file: UploadFile = File(...), model: str = Form(...)):
     """ Test model endpoint used to get the performance metrics and evaluate the model drifting."""	
-    test_set = await read_list_from_csv(file)
-    task = evaluate_task.delay(model, test_set)
+    data_path = await save_raw_data(file)
+    makeDataset = MakeDataset(data_path)
+    makeDataset.create_dataset_file()
+    task = evaluate_task.delay(model)
     return {
-        "status": TaskStatus.STARTED,
+        "status": task.status,
         "task_id": task.id
     }
 
@@ -47,7 +49,7 @@ async def start_train_task(model: str = Form(...), username: str = Form(...), pa
         raise HTTPException(status_code=401, detail="Invalid credentials")
     task = train_task.delay(model)
     return {
-        "status": TaskStatus.STARTED,
+        "status": task.status,
         "task_id": task.id
     }
     

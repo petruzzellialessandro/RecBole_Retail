@@ -1,9 +1,9 @@
 seed: 42
 reproducibility': True
-device: cuda:0
 field_separator: "\t"
-D_PRODUCT_FIELD: D_PRODUCT
+device: cuda:0
 NEG_PREFIX: ''
+D_PRODUCT_FIELD: D_PRODUCT
 ITEM_ID_FIELD: Key_product
 K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
 Key_receipt_FIELD: Key_receipt
@@ -15,13 +15,6 @@ Q_AMOUNT_FIELD: Q_AMOUNT
 Q_DISCOUNT_AMOUNT_FIELD: Q_DISCOUNT_AMOUNT
 TIME_FIELD: TS_T_RECEIPT
 USER_ID_FIELD: Key_receipt
-checkpoint_dir: "models/type_2"
-log_dir: "reports/type_2/logs"
-dataset: RECEIPT_LINES
-data_path: "data/processed/type_2"
-save_dataset: True
-dataset_save_path: "data/processed/type_2/RECEIPT_LINES-SequentialDataset.pth"
-
 dropout_prob: 0.3
 embedding_size: 64
 epochs: 50
@@ -60,6 +53,14 @@ metrics:
 - ItemCoverage
 num_layers: 1
 topk: [1, 10, 50, 100]
-train_batch_size: 1024
+train_batch_size: 4096
 train_neg_sample_args: null
-valid_metric: MRR@10
+valid_neg_sample_args: null
+test_neg_sample_args: null
+
+state: 'DEBUG'
+log_dir: .
+checkpoint_dir: "models/type_2"
+save_dataset: True
+dataset: RECEIPT_LINES_TEST
+# data_path: "data/processed/type_2"

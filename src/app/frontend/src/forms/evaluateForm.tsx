@@ -2,15 +2,12 @@ import React, { useState } from 'react';
 import {
   sendEvaluationRequest,
   handleCheckResult,
-  TaskType,
-  getStatusLink,
-  EvaluateResponse,
-  MODELS
+  renderResult,
 } from '../api';
 import { BtnProps } from '../App';
-
 import CustomSelect from '../components/select';
 import InputFile from '../components/inputFile';
+import { TaskType, EvaluateResponse, MODELS } from '../models';
 
 export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [taskID, setTaskID] = useState<string>('');
@@ -47,20 +44,29 @@ export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
     <section>
       <h2>Evaluate Performance Metrics</h2>
       <form onSubmit={handleEvaluationSubmit}>
-        <InputFile onFileSelect={(f) => setFile(f)} />
+        <InputFile placeholder="Interactions file" onFileSelect={(f) => setFile(f)} />
         <CustomSelect onSelected={setSelectedOption} options={MODELS} />
         <button type="submit" className={btnClass}>Evaluate</button>
       </form>
       {taskID && (
-        <div>
-          Task ID: <a href={getStatusLink(TASK, taskID)} target="_blank" rel="noopener noreferrer" className='underline'>{taskID}</a>
-          <p>
-            <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline">Check Result</button>
-          </p>
-        </div>
+          <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
+            <div className='col-span-2 font-bold text-lg'>Task ID:</div>
+            <div className='col-span-7'>{taskID}</div>
+          </div>
       )}
-      {taskResult && <div>Result: {JSON.stringify(taskResult.result)}</div>}
-      {errorMessage && !taskResult && <div>{errorMessage}</div>}
+      {taskID && !taskResult && (
+        <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline text-2xl font-bold p-3">Check Result</button>       
+      )}
+      {taskResult && (
+        <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
+              <div className='col-span-2 font-bold text-lg'>Task Status:</div>
+              <div className='col-span-7'>{taskResult.status}</div>
+
+              <div className='col-span-2 font-bold text-lg'>Result:</div>
+              <div className='col-span-7'>{taskResult.result ? renderResult(taskResult.result) : 'No result available.'}</div>
+          </div>
+      )}
+      {errorMessage && !taskResult && <div className='p-3 font-bold'>{errorMessage}</div>}
     </section>
   );
 };
