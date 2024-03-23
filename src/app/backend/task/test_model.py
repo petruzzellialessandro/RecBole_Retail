@@ -1,50 +1,61 @@
-from logging import getLogger
 from recbole.config import Config
-from recbole.data import create_dataset
+from recbole.data import create_dataset, data_preparation
 from recbole.data.utils import create_samplers, get_dataloader
-from recbole.quick_start import load_data_and_model
-from recbole.trainer import Trainer
-from recbole.utils import init_seed, init_logger, get_trainer
+from recbole.utils import init_seed, get_model
 import os
+import torch
+from task.metrics import RecRetailMetrics
 
-config_path = os.path.join(os.getcwd(), "config", "model_type_2_test_config.yaml")
+CONFIG_TEST_PATH = os.path.join(os.getcwd(), "config", "model_type_2_test_config.yaml")
 
-def get_performance_evaluation(model_name: str, model_path: str) -> list[str]:
+def get_performance_evaluation(model_name: str, model_path: str):
+    checkpoint = torch.load(model_path)
 
-    dataset_name = "RECEIPT_LINES_TEST"
-    print(f"Model name: {model_name}\nModel path: {model_path}\nConfig path: {config_path}")
-    config = Config(model=model_name, dataset=dataset_name, config_file_list=[config_path])
-    logger = getLogger()
-    init_logger(config)
-    logger.info(config)
-    print(f"Config: {config}")
+    config_base = checkpoint["config"]
+    dataset = create_dataset(config_base)
+    base_train_dataset, _, _ = data_preparation(config_base, dataset)
 
-    init_seed(config["seed"], config["reproducibility"])
-
-    dataset = create_dataset(config)
-    built_dataset = dataset.build()
-
-    _, _, test_sampler = create_samplers(
-        config,
-        dataset,
-        built_dataset
-    )
-    print(f"Test sampler: {test_sampler}")
-
-    test_data = get_dataloader(config, "test")(
-        config, dataset, test_sampler, shuffle=False
-    )
-    logger.info(f"Test sampler: {test_data}")
-    print(f"Test data: {test_data._dataset}")
+    init_seed(config_base["seed"], config_base["reproducibility"])
     
-    _, model, _, _, _, _ = load_data_and_model(model_path)
+    config_test = Config(model=model_name, config_file_list=[CONFIG_TEST_PATH])
+
+    test_dataset = create_dataset(config_test)
+
+    test_dataset.field2id_token = dataset.field2token_id
+    built_datasets = test_dataset.build()
     
-    trainer = get_trainer(config["MODEL_TYPE"], model_name)(config, model)
-    print(f"Model path: {model_path}")
-    # trainer.resume_checkpoint(model_path)
+    train_sampler, _, test_sampler = create_samplers(
+        config_test,
+        test_dataset,
+        built_datasets
+    )
 
-    test_result = trainer.evaluate(test_data, model_file=model_path, show_progress=True, load_best_model=True)
-    logger.info(test_result)
+    train_dataloader = get_dataloader(config_test, "test")(
+        config_test, test_dataset, train_sampler, shuffle=False
+    )
+    test_dataloader = get_dataloader(config_test, "test")(
+        config_test, test_dataset, test_sampler, shuffle=False
+    )
+        
+    model = get_model(config_base["model"])(config_base, base_train_dataset.dataset).to(config_base["device"])
+    model.load_state_dict(state_dict=checkpoint["state_dict"])
+    
+    model.eval()
+    results_pred = model.full_sort_predict(train_dataloader.dataset[:])
 
-    print(f"Evaluation completed:\n{test_result}")
-    return test_result
+    _, predicted_items_ids = torch.sort(results_pred, descending=True)
+    ground_truth = test_dataloader.dataset[:]['Key_product']
+    predicted_items = predicted_items_ids
+    users = train_dataloader.dataset[:]['K_MEMBER']
+
+    item_popularity = dataset.counter('Key_product')
+
+    recMetrics = RecRetailMetrics(
+        predicted_items=predicted_items,
+        ground_truth=ground_truth,
+        config=config_test,
+        users=users,
+        total_items=dataset.item_num,
+        item_popularity=item_popularity,
+    )
+    return recMetrics.compute_all_metrics()

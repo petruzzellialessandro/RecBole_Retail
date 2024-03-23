@@ -9,7 +9,7 @@ K_PRODUCT_TYPE_FIELD: K_PRODUCT_TYPE
 Key_receipt_FIELD: Key_receipt
 LINE_NUM_FIELD: LINE_NUM
 LIST_SUFFIX: _list
-MAX_ITEM_LIST_LENGTH: 7
+MAX_ITEM_LIST_LENGTH: 50
 QUANTITY_FIELD: QUANTITY
 Q_AMOUNT_FIELD: Q_AMOUNT
 Q_DISCOUNT_AMOUNT_FIELD: Q_DISCOUNT_AMOUNT
@@ -19,9 +19,7 @@ checkpoint_dir: "models/type_2"
 log_dir: "."
 dataset: RECEIPT_LINES
 data_path: "models/type_2/RECEIPT_LINES"
-save_dataset: True
-# dataset_save_path: "models/type_2/RECEIPT_LINES-SequentialDataset.pth"
-
+save_dataset: False
 dropout_prob: 0.3
 embedding_size: 64
 epochs: 50
@@ -35,13 +33,7 @@ eval_batch_size: 1024
 hidden_size: 128
 load_col:
   inter:
-  - K_MEMBER
-  - TS_T_RECEIPT
-  - LINE_NUM
-  - Key_receipt
-  - QUANTITY
-  - Q_AMOUNT
-  - Q_DISCOUNT_AMOUNT
+  - K_MEMBER'
   - Key_product
   item: 
   - Key_product

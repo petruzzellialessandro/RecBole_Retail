@@ -17,3 +17,4 @@ models/
 reports
 __pycache__
 .DS_Store
+recbole_retail.egg-info

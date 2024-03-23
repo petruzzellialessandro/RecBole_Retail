@@ -1,28 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   sendEvaluationRequest,
   handleCheckResult,
-  renderResult,
+  copyToClipboard,
+  renderEvaluateResponse,
 } from '../api';
 import { BtnProps } from '../App';
 import CustomSelect from '../components/select';
 import InputFile from '../components/inputFile';
-import { TaskType, EvaluateResponse, MODELS } from '../models';
+import { EvaluateResponse, MODELS } from '../models';
 
 export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
   const [taskID, setTaskID] = useState<string>('');
-  const [taskResult, setTaskResult] = useState<EvaluateResponse | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
-  const TASK = TaskType.EVALUATE;
+  const [taskResponse, setTaskResponse] = useState<EvaluateResponse>();
+  const [showResponse, setShowResponse] = useState<boolean>(false);
+  const [showCheckButton, setShowCheckButton] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (taskResponse) {
+      setShowCheckButton(false);
+      setShowResponse(true);
+    }
+  }, [taskResponse]);
 
   const handleEvaluationSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setErrorMessage('');
+    setMessage('');
+    setShowResponse(false);
+    setShowCheckButton(true);
 
     if (!file || !selectedOption) {
-      setErrorMessage('All fields are required.');
+      setMessage('All fields are required.');
       return;
     }
 
@@ -31,12 +42,11 @@ export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
     formData.append('file', file);
 
     try {
-      const taskResponse = await sendEvaluationRequest(formData);
-      setTaskID(taskResponse.task_id);
-      setTaskResult(null);
-      handleCheckResult(taskResponse.task_id, setErrorMessage, setTaskResult, TaskType.EVALUATE);
+      const response = await sendEvaluationRequest(formData);
+      setTaskID(response.task_id);
+      handleCheckResult(response.task_id, setMessage, setTaskResponse);
     } catch (error) {
-      setErrorMessage(`Failed to send evaluation request: ${error}`);
+      setMessage(`Failed to send evaluation request: ${error}`);
     }
   };
 
@@ -49,24 +59,18 @@ export const EvaluateForm: React.FC<BtnProps> = ({ btnClass }) => {
         <button type="submit" className={btnClass}>Evaluate</button>
       </form>
       {taskID && (
-          <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
+          <div className='p-3 pb-0 grid grid-cols-9 gap-x-4 gap-y-2'>
             <div className='col-span-2 font-bold text-lg'>Task ID:</div>
-            <div className='col-span-7'>{taskID}</div>
+            <div className='col-span-7'>{copyToClipboard(taskID)}</div>
           </div>
       )}
-      {taskID && !taskResult && (
-        <button onClick={() => handleCheckResult(taskID, setErrorMessage, setTaskResult, TASK)} className="text-accent-700 hover:underline text-2xl font-bold p-3">Check Result</button>       
+      {taskResponse && showResponse  && (
+        <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>{taskResponse && showResponse ? renderEvaluateResponse(taskResponse) : 'No result available.'}</div>
       )}
-      {taskResult && (
-        <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
-              <div className='col-span-2 font-bold text-lg'>Task Status:</div>
-              <div className='col-span-7'>{taskResult.status}</div>
-
-              <div className='col-span-2 font-bold text-lg'>Result:</div>
-              <div className='col-span-7'>{taskResult.result ? renderResult(taskResult.result) : 'No result available.'}</div>
-          </div>
+      {message && showResponse && <div className='p-3 font-bold text-lg'>{message}</div>}
+      {taskID && showCheckButton && (
+        <button onClick={() => handleCheckResult(taskID, setMessage, setTaskResponse)} className="text-accent-700 hover:underline text-2xl font-bold p-3">Check Result</button>       
       )}
-      {errorMessage && !taskResult && <div className='p-3 font-bold'>{errorMessage}</div>}
     </section>
   );
 };

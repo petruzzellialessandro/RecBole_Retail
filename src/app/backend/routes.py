@@ -2,10 +2,10 @@ from celery.result import AsyncResult
 from fastapi import HTTPException, Form, File, UploadFile, APIRouter
 from fastapi.responses import JSONResponse
 from http import HTTPStatus
-from schemas import TaskNotFoundResponse, TaskStatus, TaskStatusResponse, TaskType, PredictResponse, EvaluateResponse, TrainResponse
+from schemas import TaskNotFoundResponse, TaskStatus, TaskStatusResponse, TaskResponse
 from task.make_dataset import MakeDataset
 from task.tasks import predict_task, evaluate_task, train_task
-from task.utils import save_raw_data, read_list_from_csv
+from task.utils import read_list_from_csv
 from task.worker import app as celery_app
 from typing import Union
 import os
@@ -33,9 +33,8 @@ async def start_predict_task(user_token: str = Form(...), k: int = Form(10), fil
 @main.post("/evaluate", tags=["Evaluate"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
 async def start_evaluate_task(file: UploadFile = File(...), model: str = Form(...)):
     """ Test model endpoint used to get the performance metrics and evaluate the model drifting."""	
-    data_path = await save_raw_data(file)
-    makeDataset = MakeDataset(data_path)
-    makeDataset.create_dataset_file()
+    dataset_path = await MakeDataset.csv_to_pickle(file)
+    MakeDataset.build(name='RECEIPT_LINES_TEST', filepath=dataset_path)
     task = evaluate_task.delay(model)
     return {
         "status": task.status,
@@ -53,34 +52,30 @@ async def start_train_task(model: str = Form(...), username: str = Form(...), pa
         "task_id": task.id
     }
     
-@main.get("/{task_type}/task-status/{task_id}", status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
-async def check_task_status(task_type: TaskType, task_id: str):
+@main.get("/task-status/{task_id}", tags=["Status"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
+async def check_task_status(task_id: str):
     task = AsyncResult(task_id, app=celery_app)
     return {
         "status": task.status,
         "task_id": task_id
     }
     
-@main.get("/{task_type}/task-result/{task_id}", tags=["Results"], status_code=HTTPStatus.OK, response_model=Union[TaskNotFoundResponse, PredictResponse, EvaluateResponse, TrainResponse], response_class=JSONResponse)
-async def get_task_result(task_type: TaskType, task_id: str):
+@main.get("/task-result/{task_id}", tags=["Results"], status_code=HTTPStatus.OK, response_model=Union[TaskNotFoundResponse, TaskResponse], response_class=JSONResponse)
+async def get_task_result(task_id: str):
     task = AsyncResult(task_id, app=celery_app)
-
-    if task.state == "PENDING":
-        return TaskNotFoundResponse(status=TaskStatus.UNKNOWN, task_id=task_id, result='Task not started or not existing')    
-    else:
+    try:
+        if task.state == "PENDING":
+            return TaskNotFoundResponse(status=TaskStatus.UNKNOWN, task_id=task_id, result='Task not started or not existing')    
+        else:
+            response = {
+                "status": task.state,
+                "task_id": task_id,
+                "result": task.result
+            }
+    except Exception as e:
         response = {
-            "status": task.state,
+            "status": TaskStatus.FAILURE,
             "task_id": task_id,
-            "result": task.result
+            "result": str(e.error)
         }
-            
-        match task_type:
-            case TaskType.PREDICT:
-                response =  PredictResponse(**response)
-            case TaskType.EVALUATE:
-                response =  EvaluateResponse(**response)
-            case TaskType.TRAIN:
-                response =  TrainResponse(**response)
-            case _:
-                response = TaskStatusResponse(status=TaskStatus.UNKNOWN, task_id=task_id)
-        return response
+    return response

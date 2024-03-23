@@ -10,8 +10,9 @@ pandas==2.2.1
 pydantic==2.6.3
 python-multipart==0.0.9
 PyYAML==6.0.1
-recbole==1.2.0
 ray==2.9.1
+recbole==1.2.0
+redis==5.0.2
 scikit_learn==1.4.0
 starlette==0.36.3
 uvicorn==0.27.1

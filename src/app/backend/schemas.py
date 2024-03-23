@@ -19,14 +19,8 @@ class TaskStatusResponse(BaseModel):
     status: TaskStatus
     task_id: str
 
-class PredictResponse(TaskStatusResponse):
-    result: Optional[List[str]] = None
-
-class EvaluateResponse(TaskStatusResponse):
+class TaskResponse(TaskStatusResponse):
     result: Optional[dict] = None
-
-class TrainResponse(TaskStatusResponse):
-    result: Optional[bool] = None
 
 class TaskNotFoundResponse(TaskStatusResponse):
     result: str

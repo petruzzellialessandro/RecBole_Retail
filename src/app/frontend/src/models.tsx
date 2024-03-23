@@ -34,15 +34,32 @@ export enum TaskType {
     status: TaskStatus;
     task_id: string;
   };
+
+  export type BaseInteraction = {
+    token: string;
+    description: string;
+  }
   
-  export type PredictResponse = {
-    status: TaskStatus;
-    task_id: string;
-    result: [];
+  export type PredictRecommendation = BaseInteraction & {
+    score: number;
+  };
+
+  export type PredictResult = {
+    user_token: string;
+    recommendations: PredictRecommendation[];
+    past_interactions: BaseInteraction[];
+  }
+  
+  export type PredictResponse = BaseResponse & {
+    result: PredictResult;
   };
   
-  export type EvaluateResponse = {
-    status: TaskStatus;
-    task_id: string;
+  export type EvaluateResponse = BaseResponse & {
     result: {};
+  };
+
+  export type ErrorResponse = BaseResponse & {
+    result: {
+      error: string;
+    };
   };

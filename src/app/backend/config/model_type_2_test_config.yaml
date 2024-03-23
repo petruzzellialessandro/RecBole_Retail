@@ -19,11 +19,11 @@ dropout_prob: 0.3
 embedding_size: 64
 epochs: 50
 eval_args:
-  group_by: 'user'
+  group_by: 'none'
   mode: full
   order: TO
   split:
-    LS: valid_and_test
+    LS: test_only
 eval_batch_size: 1024
 hidden_size: 128
 load_col:
@@ -57,10 +57,10 @@ train_batch_size: 4096
 train_neg_sample_args: null
 valid_neg_sample_args: null
 test_neg_sample_args: null
-
-state: 'DEBUG'
-log_dir: .
+valid_metric: MRR@10
 checkpoint_dir: "models/type_2"
+log_dir: "."
 save_dataset: True
 dataset: RECEIPT_LINES_TEST
-# data_path: "data/processed/type_2"
+data_path: "data/processed/type_2"
+tail_length: 0.2

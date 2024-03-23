@@ -1,29 +1,29 @@
 import React, { useState } from 'react';
-import { fetchTaskResult, renderResult } from '../api';
+import { fetchTaskResult, renderResponse } from '../api';
 import { BtnProps } from '../App';
-import CustomSelect from '../components/select';
-import { TASK_TYPES } from '../models';
+import { EvaluateResponse, PredictResponse } from '../models';
 
 export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
     const [taskID, settaskID] = useState('');
-    const [taskResult, setTaskResult] = useState<any | null>(null);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [selectedOption, setSelectedOption] = useState<string>('');
+    const [taskResponse, setTaskResponse] = useState<PredictResponse | EvaluateResponse | null>(null);
+    const [message, setMessage] = useState('');
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if (!taskID || !selectedOption) {
-            setErrorMessage('Please select a task type and enter a task ID.');
+        setMessage('');
+        setTaskResponse(null);
+
+        if (!taskID) {
+            setMessage('Please select a task ID.');
             return;
         }
 
         try {
-            const result = await fetchTaskResult(selectedOption, taskID);
-            setTaskResult(result);
-            setErrorMessage('');
+            const result = await fetchTaskResult(taskID);
+            setTaskResponse(result);
         } catch (error) {
-            setErrorMessage(`Failed to fetch task result: ${error}`);
-            setTaskResult(null);
+            setMessage(`Failed to fetch task result: ${error}`);
+            setTaskResponse(null);
         }
     };
 
@@ -31,7 +31,6 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
         <section>
             <h2>Fetch Task Result</h2>
             <form onSubmit={handleSubmit}>
-                <CustomSelect onSelected={setSelectedOption} options={TASK_TYPES} placeholder='Select a Task Type'/>
                 <input
                     type="text"
                     placeholder="Enter task ID"
@@ -42,22 +41,20 @@ export const ResultForm: React.FC<BtnProps> = ({ btnClass }) => {
                 />
                 <button className={btnClass} type="submit">Fetch</button>
             </form>
-            {taskID && (
-                <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
-                    <div className='col-span-2 font-bold text-lg'>Task ID:</div>
-                    <div className='col-span-7'>{taskID}</div>
-                </div>
-            )}
-            {taskResult && (
+            {/* {taskResponse && (
                 <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>
                     <div className='col-span-2 font-bold text-lg'>Task Status:</div>
-                    <div className='col-span-7'>{taskResult.status}</div>
+                    <div className='col-span-7'>{taskResponse.status}</div>
 
                     <div className='col-span-2 font-bold text-lg'>Result:</div>
-                    <div className='col-span-7'>{taskResult.result ? renderResult(taskResult.result) : 'No result available.'}</div>
+                    <div className='col-span-7'>{taskResponse.result ? renderResult(taskResponse.result) : 'No result available.'}</div>
                 </div>
             )}
-            {errorMessage && <div>{errorMessage}</div>}
+            {message && showResponse && <div className='p-3 font-bold text-lg'>{message}</div>} */}
+            {taskResponse && (
+                <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>{taskResponse ? renderResponse(taskResponse) : 'No result available.'}</div>
+            )}
+            {message && <div className='p-3 font-bold text-lg'>{message}</div>}
         </section>
     );
 };

@@ -1,22 +1,25 @@
+from datetime import datetime
+from fastapi import UploadFile
+import ast
+import io
 import os
 import pandas as pd
 
+DATA_PATH = os.path.join(os.getcwd(), "data")
+RAW_DATA_PATH = os.path.join(DATA_PATH, "raw")
+PROCESSED_DATA_PATH = os.path.join(DATA_PATH, "processed")
+
 class MakeDataset:
-    def __init__(self, data=None):
-        self.raw_data_path = os.path.join(os.getcwd(), "data", "raw")
-        self.processed_data_path = os.path.join(os.getcwd(), "data", "processed")
-        self.data = data
-        self.name = "RECEIPT_LINES_TEST" if self.data else "RECEIPT_LINES"
-        self.dataset_path = None
+    
+    @staticmethod
+    def build(name="RECEIPT_LINES", filepath: str = None):
+        source_path = filepath if filepath else os.path.join(RAW_DATA_PATH, 'lines_hier.pkl')
+        df = pd.read_pickle(source_path)
+        df['DT_T_RECEIPT'] = df['T_RECEIPT'].astype('datetime64[s]')
+        df['TS_T_RECEIPT'] = df['DT_T_RECEIPT'].apply(lambda x: x.timestamp())
 
-    def create_dataset_file(self):
-        source_path = self.data if self.data else os.path.join(self.raw_data_path, 'lines_hier.pkl')
-        data = pd.read_pickle(source_path)
-        data['DT_T_RECEIPT'] = data['T_RECEIPT'].astype('datetime64[s]')
-        data['TS_T_RECEIPT'] = data['DT_T_RECEIPT'].apply(lambda x: x.timestamp())
-
-        inter = data[['K_MEMBER', 'TS_T_RECEIPT', 'LINE_NUM', 'Key_receipt', 'QUANTITY', 'Q_AMOUNT', 'Q_DISCOUNT_AMOUNT', 'Key_product']]
-        item = data[['D_PRODUCT', 'K_PRODUCT_TYPE', 'Key_product', 'hierarchy', 'K_DITTA']]
+        inter = df[['K_MEMBER', 'TS_T_RECEIPT', 'LINE_NUM', 'Key_receipt', 'QUANTITY', 'Q_AMOUNT', 'Q_DISCOUNT_AMOUNT', 'Key_product']]
+        item = df[['D_PRODUCT', 'K_PRODUCT_TYPE', 'Key_product', 'hierarchy', 'K_DITTA']]
 
         inter = inter.rename(columns={'K_MEMBER': 'K_MEMBER:token',
                                        'TS_T_RECEIPT': 'TS_T_RECEIPT:float',
@@ -34,20 +37,47 @@ class MakeDataset:
                                      'hierarchy': 'hierarchy:token_seq'})
         item = item.drop_duplicates("Key_product:token").reset_index(drop=True)
 
-        out_dir_type_1 = os.path.join(self.processed_data_path, 'type_1', self.name)
+        out_dir_type_1 = os.path.join(PROCESSED_DATA_PATH, 'type_1', name)
         if not os.path.exists(out_dir_type_1):
             os.makedirs(out_dir_type_1)
-        item.to_csv(os.path.join(out_dir_type_1, f'{self.name}.item'), sep='\t', index=False)
-        inter.to_csv(os.path.join(out_dir_type_1, f'{self.name}.inter'), sep='\t', index=False)
+        item.to_csv(os.path.join(out_dir_type_1, f'{name}.item'), sep='\t', index=False)
+        inter.to_csv(os.path.join(out_dir_type_1, f'{name}.inter'), sep='\t', index=False)
+        print(f"Dataset files {name}.item and {name}.inter created at {out_dir_type_1}")
 
-        out_dir_type_2 = os.path.join(self.processed_data_path, 'type_2', self.name)
+        out_dir_type_2 = os.path.join(PROCESSED_DATA_PATH, 'type_2', name)
         if not os.path.exists(out_dir_type_2):
             os.makedirs(out_dir_type_2)
 
-        self.dataset_path = os.path.join(out_dir_type_2, f'{self.name}.inter')
-        inter.to_csv(self.dataset_path, sep='\t', index=False)
-        print(f"Dataset file created at {self.dataset_path}")
+        dataset_path = os.path.join(out_dir_type_2, f'{name}.inter')
+        inter.to_csv(dataset_path, sep='\t', index=False)
+        print(f"Dataset file {name}.inter created at {dataset_path}")
 
-# if __name__ == '__main__':
-#     dataset_creator = MakeDataset()
-#     dataset_creator.create_dataset_file()
+    @staticmethod
+    async def csv_to_pickle(file: UploadFile) -> str:
+        """ Save the raw interactions file."""
+
+        contents = await file.read()
+        decoded_contents = io.StringIO(contents.decode('utf-8'))
+        df = pd.read_csv(decoded_contents, sep=',')
+            
+        expected_columns = [
+            "Key_product", "Key_receipt", "LINE_NUM", "K_PRODUCT_TYPE",
+            "D_PRODUCT", "K_MEMBER", "QUANTITY", "Q_AMOUNT", "Q_DISCOUNT_AMOUNT",
+            "T_RECEIPT", "K_DITTA", "hierarchy"
+        ]
+
+        if not all(column in df.columns for column in expected_columns):
+            raise ValueError("File attributes do not match the required ones.")
+        
+        df['hierarchy'] = df['hierarchy'].apply(lambda x: ast.literal_eval(str(x)))
+        now = datetime.now()
+        filename = f"lines_hier_test-{now.day}-{now.strftime('%b')}-{now.year}-{now.hour}-{now.minute}-{now.second}.pkl"
+
+        if not os.path.exists(RAW_DATA_PATH):
+            os.makedirs(RAW_DATA_PATH)
+        raw_dataset_path = os.path.join(RAW_DATA_PATH, filename)
+
+        df.to_pickle(raw_dataset_path)
+        
+        print(f"Raw data saved at: {raw_dataset_path}")
+        return raw_dataset_path

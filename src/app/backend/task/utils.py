@@ -6,12 +6,6 @@ import os
 import pandas as pd
 import re
 import torch
-import pickle
-
-# def get_filename_without_extension(path) -> str:
-#     basename = os.path.basename(path)
-#     filename_without_extension = os.path.splitext(basename)[0]
-#     return filename_without_extension
 
 def make_interaction_df(config, dataset, user_token: str, item_tokens: list[str]) -> pd.DataFrame:
     """ Create the interaction dataframe."""
@@ -39,41 +33,13 @@ async def read_list_from_csv(file: UploadFile) -> list:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
     
-async def save_raw_data(file: UploadFile) -> str:
-    """ Save the raw interactions file."""
-
-    contents = await file.read()
-    decoded_contents = io.StringIO(contents.decode('utf-8'))
-    df = pd.read_csv(decoded_contents, sep=',')
-        
-    expected_columns = [
-        "Key_product", "Key_receipt", "LINE_NUM", "K_PRODUCT_TYPE",
-        "D_PRODUCT", "K_MEMBER", "QUANTITY", "Q_AMOUNT", "Q_DISCOUNT_AMOUNT",
-        "T_RECEIPT", "K_DITTA", "hierarchy"
-    ]
-        
-    if not all(column in df.columns for column in expected_columns):
-        raise ValueError("File attributes do not match the required ones.")
+def find_latest_model(prefix: str, path=None) -> str:
+    models_path = path if path else os.path.join(os.getcwd(), "models", "type_2")
     
-    now = datetime.now()
-    filename = f"lines_hier_test-{now.day}-{now.strftime('%b')}-{now.year}-{now.hour}-{now.minute}-{now.second}.pkl"
-    save_path = os.path.join(os.getcwd(), "data", "raw")
-
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    filepath = os.path.join(save_path, filename)
-
-    df.to_pickle(filepath)
-    
-    print(f"Raw data saved at: {filepath}")
-    return filepath
-
-def find_latest_model(directory: str, prefix: str) -> str:
     regex_pattern = rf"{prefix}-([A-Za-z]+)-(\d+)-(\d+)_(\d+)-(\d+)-(\d+)\.pth"
     latest_file = None
     latest_time = None
-
-    for file in os.listdir(directory):
+    for file in os.listdir(models_path):
         match = re.match(regex_pattern, file, re.IGNORECASE)
         if match:
             month_str, day, year, hour, minute, second = match.groups()
@@ -88,24 +54,36 @@ def find_latest_model(directory: str, prefix: str) -> str:
                 latest_file = file
                 latest_time = file_time
 
-    return os.path.join(directory, latest_file)
-
-def get_products_from_tokens(tokens: list[str]) -> list[str]:
-    print(f"Tokens: {tokens}")
+    if latest_file is not None:
+        return os.path.join(models_path, latest_file)
+    else:
+        return None
+    
+def get_products_from_tokens(tokens: list[str]) -> list[{str, str}]:
+    print(f"Products from item tokens: {tokens}")
     """ Get the descriptions from the tokens."""
     pickle_file_path = os.path.join(os.getcwd(), "data", "raw", "products.pkl")
     df = pd.read_pickle(pickle_file_path)
 
-    tokens_int = [int(token) for token in tokens if token.isdigit()]
+    tokens_int = [int(token) for token in tokens]
     filtered_df = df[df['K_PRODUCT'].isin(tokens_int)][['K_PRODUCT', 'D_PRODUCT']]
-    print(f"Filtered df: {filtered_df}")
-    descriptions = [f"{row['K_PRODUCT']}: {row['D_PRODUCT']}" for _, row in filtered_df.iterrows()]
+    items = [{'token': str(row['K_PRODUCT']), 'description': row['D_PRODUCT']} for _, row in filtered_df.iterrows()]
+    print(f"Products items: {items}")
+    return items
 
-    print(f"Descriptions: {descriptions}")
-    return descriptions
+def get_ground_truth_from_interactions(dataset) -> list:
+    """ Get the ground truth from the interactions."""
+    inter = dataset.inter_matrix(form='csr')
+    user_item_pairs = []
+
+    for user_id in range(inter.shape[0]):
+        start_idx = inter.indptr[user_id]
+        end_idx = inter.indptr[user_id + 1]
+        item_indices = inter.indices[start_idx:end_idx]
+        
+        user_item_pairs.extend([(user_id, item_id) for item_id in item_indices])
+    return user_item_pairs
 
 if __name__ == "__main__":
-    current_dir = os.getcwd()
-    models_path = os.path.join(current_dir, "models", "type_2")
-    latest_model_path = find_latest_model(models_path, "GRU4Rec")
+    latest_model_path = find_latest_model("GRU4Rec")
     print(f"Latest model path: {latest_model_path}")

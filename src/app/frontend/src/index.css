@@ -28,13 +28,6 @@ body {
   line-height: 1.6;
 }
 
-.container {
-  @apply h-lvh;
-  width: 80%;
-  margin: auto;
-  overflow: hidden;
-}
-
 h1, h3 {
   @apply text-primary-500;
 }
@@ -51,14 +44,16 @@ input[type = "file"] {
   @apply opacity-0 absolute;
 }
 
-*:hover {
-  & label {
-    @apply hover:text-accent-700 hover:border-accent-700;
-  };
-  & .select-model__control, label, input[type="text"], input[type="number"], input[type="password"]{
-    @apply hover:border-accent-700;
-  }
+label:hover {
+  @apply hover:text-accent-700 hover:border-accent-700;
+}
 
+.select-model__control:hover,
+label:hover,
+input[type="text"]:hover,
+input[type="number"]:hover,
+input[type="password"]:hover {
+  @apply hover:border-accent-700;
 }
 
 .select-model__control, input, label {
@@ -87,4 +82,16 @@ section {
   margin-bottom: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.toClipboard {
+  @apply cursor-pointer;
+}
+.toClipboard:hover,
+.toClipboard:focus {
+  @apply text-accent-700;
+}
+.toClipboard:active {
+  @apply text-black;
+  transition: none;
 }

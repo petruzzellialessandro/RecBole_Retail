@@ -1,78 +1,89 @@
 # Retail RecBole
 
-## Preliminaries
+## Overview
+This project aims to transform the shopping experience in the retail sector through the application of advanced artificial intelligence models.
 
-Creare un env python nuovo e installare i requirements
 
-## Struttura del progetto
+## Getting Started
 
-Questo repository contiente l’implementazione di alcuni modelli presenti
-nella libreria RecBole adattati ad un contesto Retail. Al progetto è
-strutturato nel seguente modo:
+- Rename the `sample.env` file into `.env` and fill it with your OpenAI account informations. Remember to change the admin credentials to prevent unauthorized access to the traiing process.
+- Install Python from [Python Download Link](https://www.python.org/downloads/).
+- Install Docker from [Docker Download Link](https://docs.docker.com/get-docker/).
+- Run the `setup_backend_data.py` script placed in the root folder.
 
-- `raw_data`: In questa cartella ci sono i dati grezzi, non ancora
-  processati per essere utilizzati dalla libreria. **Inserire in questa
-  cartella i file `lines_hier.pkl` e `products.pkl`**
-- `model_type_1`: All’interno di questa cartella è presente il notebook
-  per addestrare ed eseguire i modelli. Qui verranno create le cartelle
-  per il salvataggio dei modelli e dei risultati sul test set.
-- `model_type_2`: All’interno di questa cartella sono presenti due
-  notebook notebook. Il primo è identico a quello presente nella
-  cartella `model_type_1` (ed è giusto così, cambia il file di
-  configurazione). Il secondo contiene le celle da eseguire per ottenere
-  gli embedding a partire dalla gerarchia e salvare il file nel formato
-  utilizzato dalla liberia.
+    On Windows:
+    ```
+    python setup_backend_data.py
+    ```
+    On Unix/Linux/MacOS:
+    ```
+    python3 setup_backend_data.py
+    ```
 
-# File importanti
+### Running the Software with Docker (recommended)
+To run the software using Docker, follow these steps:
 
-- `dataset_creation.ipynb`: Questo file adatta il formato dei dati
-  presenti nella cartella `raw_data` al formato preso in input dalla
-  libreria.
-- `config.yaml`: File di configurazione generale dei modelli. **Se non
-  funziona qualcosa probabilmente il problema è qui.** Qui vanno
-  specificati i path del dataset, gli iperparametri del modello, le
-  metriche da calcolare, numero di epoche, etc. NB: modificare la voce
-  `device` in `cpu` se non si possiede una GPU Nvidia su cui addestrare
-  i modelli.
+- Start the Docker containers with the command:
+    ```
+    docker-compose up
+    ```
 
-## Ordine di esecuzione
+### Running the Software without Docker
+If you prefer not to use Docker, you can follow these steps to set up the environment manually:
 
-Dopo aver salvato nella cartella `raw_data` i file `lines_hier.pkl` e
-`products.pkl`, eseguire tutte le celle del notebook
-`dataset_creation.ipynb`. Al termine all’iterno delle cartelle
-`model_type_1` e `model_type_2` saranno create `RECEIPT_LINES`
-dovrebbero esser generati i seguenti file file:
+#### Message Broker Setup
+- Install Docker from [Docker Download Link](https://docs.docker.com/get-docker/).
+- Download the `Redis` container:
+    ```
+    docker pull redis
+    ```
+- Run the container:
+    ```
+    docker run --name redis -p 6379:6379 -d redis
+    ```
 
-- `RECEIPT_LINES.inter`: file che modella i singoli acquisti con tutte
-  le proprietà dello scontrino in entrambe le cartelle
-- `RECEIPT_LINES.item`: file che modella i singoli prodotti con le loro
-  proprietà (compresa la gerarchia) solo nella cartella `model_type_1`
+#### Backend Setup
+- Create a Python virtual environment inside the "src/app/backend" folder:
+    ```
+    python -m venv venv
+    ```
+- Activate the virtual environment:
+    On Windows:
+    ```
+    .\venv\Scripts\activate
+    ```
+    On Unix or MacOS:
+    ```
+    source venv/bin/activate
+    ```
+- Install the requirements specified in the "backend" folder:
+    ```
+    pip install -r backend/requirements.txt -r backend/requirements_torch.txt
+    ```
+- Depending on your system, run the `run.sh` script for Unix/Linux or the `run.bat` script for Windows to start the backend server.
 
-## Modelli che non utilizzano la gerarchia
+#### Frontend Setup
+- Install NodeJS version 18.17.1 from [NodeJS Download Link](https://nodejs.org/en/download/)
+- Inside the "src/app/frontend" folder, install the project dependencies:
+    ```
+    npm i
+    ```
+- Start the frontend application:
+    ```
+    npm start
+    ```
 
-Per eseguire i modelli che non utilizzano gli attributi eseguire le
-celle presenti nel file `Models_Train_Test.ipynb` nella cartella
-`model_type_1`, per ogni modello sono presenti due celle: la prima
-addestra il modello, la seconda salva i risultati ottenuti sul test set
-nella cartella `results` con il nome `{nome_modello}_test.json`.
+## Usage
+Visit the page at http://127.0.0.1:3000/ to access the frontend application.
+- Start the train process for a model the first time you run the Software and wait for its completion.
+- Store the task id to check the status and results later, because it will take a while.
+- For testing purposes, you can use the `test_prediction_data.csv` to ask for some user predictions, given a user token, or start an evaluation of the model using the and the `test_evaluation_data.csv` file. Both files are placed in the frontend folder.
 
-## Modelli che utilizzano la gerarchia
+## API Documentation
 
-Per eseguire i modelli che utilizzano la gerarchia si deve creare
-prepare un file di embedding “pre-appresi”. Per farlo, eseguire tutte le
-cella del notebook `prepare_embedding.ipynb`. Al termine nella cartella
-`RECEIPT_LINES` presente in `model_type_1` sarà salvato il file
-`RECEIPT_LINES.item` composto da due colonne. Il codice identificato del
-file e l’embedding relativo. La prima cella del file
-`prepare_embedding.ipynb` permette di modificare alcuni parametri del
-processo di otteniment degli emebdding:
+For the API documentation, please visit: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
-- `HIERARCHY_MAX_LEN`: Numero di prodotti da considerare nella
-  gerarchia. Gli esperimenti effettuati hanno considerato 3 elementi
-- `EMBEDDING_SIZE`: Grandezza degli emebeddi da ottenere. 64 negli
-  scorsi esperimenti
-- `MERGE_METHOD`: Metodo di merge degli emebedding dei singoli elementi
-  della gerarchia. Può essere *sum* o *mean*
+## CHANGELOG
 
-Per addestrare i modelli che utilizzano questa informazione eseguire le
-celle del file `Models_Train_Test.ipynb` nella cartella `model_type_2`.
+Details about the previous notebook based implementation can be found [here](README_OLD.md).
+Config and data files are placed in their respective root folders.

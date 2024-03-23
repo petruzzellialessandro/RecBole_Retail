@@ -1,10 +1,10 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
-    name='src',
-    packages=find_packages(),
+    name='recbole_retail',
+    packages=['src/app/backend', 'src/app/backend/task'],
     version='0.1.0',
-    description='A short description of the project.',
-    author='Your name (or your organization/company/team)',
-    license='',
+    description='RecBole Based Recommender System For Retail Industry.',
+    author='Francesco Peragine',
+    license='MIT',
 )

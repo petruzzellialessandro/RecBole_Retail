@@ -1,4 +1,6 @@
-import { TaskStatus, TaskType } from "./models";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { BaseInteraction, ErrorResponse, EvaluateResponse, PredictRecommendation, PredictResponse, TaskStatus } from "./models";
+import { faClipboard } from "@fortawesome/free-solid-svg-icons";
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
 
@@ -10,16 +12,13 @@ const fetchData = async (url: string) => {
   return response.json();
 };
 
-export const getStatusLink = (task: string, taskId: string) => taskId ? `${BACKEND_URL}/${task}/task-status/${taskId}` : '';
-export const getResultLink = (task: string, taskId: string) => taskId ? `${BACKEND_URL}/${task}/task-result/${taskId}` : '';
-
-export const checkTaskStatus = async (task: string, taskId: string) => {
-  const url = `${BACKEND_URL}/${task}/task-status/${taskId}`;
+export const checkTaskStatus = async (taskId: string) => {
+  const url = `${BACKEND_URL}/task-status/${taskId}`;
   return fetchData(url);
 };
 
-export const fetchTaskResult = async (task: string, taskId: string) => {
-  const url = `${BACKEND_URL}/${task}/task-result/${taskId}`;
+export const fetchTaskResult = async (taskId: string) => {
+  const url = `${BACKEND_URL}/task-result/${taskId}`;
   return fetchData(url);
 };
 
@@ -52,61 +51,136 @@ export const sendTrainingRequest = async (data: FormData) => {
 
 export const handleCheckResult = async (
   taskId: string,
-  setErrorMessage: React.Dispatch<string>,
-  setTaskResult: React.Dispatch<any>,
-  task: TaskType
+  setMessage: React.Dispatch<string>,
+  setTaskResult: React.Dispatch<PredictResponse>
 ) => {
   try {
-    const statusResponse = await checkTaskStatus(task, taskId);
+    const statusResponse = await checkTaskStatus(taskId);
     switch (statusResponse.status) {
       case TaskStatus.STARTED:
-        setErrorMessage('Task has started.');
+        setMessage('Task has started.');
         break;
         case TaskStatus.PENDING:
-          setErrorMessage('Task is not completed yet.');
+          setMessage('Task is not completed yet.');
           break;
           case TaskStatus.SUCCESS:
-        const result = await fetchTaskResult(task, taskId);
+        const result = await fetchTaskResult(taskId);
         if (result) {
-          setErrorMessage('')
+          setMessage('')
           setTaskResult(result);
         }
         break;
       case TaskStatus.FAILED:
-        setErrorMessage('Task failed.');
+        setMessage('Task failed.');
         break;
       default:
-        setErrorMessage('Status unknown.');
+        setMessage('Status unknown.');
     }
   } catch (error) {
-    setErrorMessage(`Failed to fetch task result: ${error}`);
+    setMessage(`Failed to fetch task result: ${error}`);
   }
 };
 
 export const renderResult = (result: boolean | [] | {}) => {
+  const renderArray = (items: any[]) => (
+    <ul>{items.map((item, index) => <li key={index}>{JSON.stringify(item)}</li>)}</ul>
+  );
+
+  const renderObject = (obj: object) => (
+    <ul>{Object.entries(obj).map(([key, value]) => <li key={key}>{`${key}: ${JSON.stringify(value)}`}</li>)}</ul>
+  );
+
   if (Array.isArray(result)) {
-      return (
-          <div>
-              <ul>
-                  {result.map((item, index) => (
-                      <li key={index}>{item}</li>
-                  ))}
-              </ul>
-          </div>
-      );
+    return <div>{renderArray(result)}</div>;
   } else if (typeof result === 'object' && result !== null) {
-      return (
-          <div>
-              <ul>
-                  {Object.entries(result).map(([key, value]) => (
-                      <li key={key}>{`${key}: ${value}`}</li>
-                  ))}
-              </ul>
-          </div>
-      );
+    return <div>{renderObject(result)}</div>;
   } else {
-      return <div>{result.toString()}</div>;
+    return <div>{result.toString()}</div>;
   }
 };
 
-export { TaskType };
+export const renderResponse = (response: any) => {
+  if((response as ErrorResponse).result.error) return renderErrorResponse((response));
+  if((response as PredictResponse).result.recommendations) return renderPredictResponse(response);
+  return renderEvaluateResponse(response);
+};
+
+export const renderErrorResponse = (response: ErrorResponse) => {
+  return (
+  <>
+    <div className='col-span-2 font-bold text-lg'>Error:</div>
+    <div className='col-span-7'>{response.result.error}</div>
+  </>
+  )
+}
+
+export const renderPredictResponse = (response: any) => {
+  
+  const renderInteractions = (interactions: BaseInteraction[]) => (
+    <ul>
+      {/* Token: {interaction.token}, Description: {interaction.description} */}
+      {interactions.map((interaction, index) => (
+        <li key={index}>{interaction.description}</li>
+      ))}
+    </ul>
+  );
+
+  const renderRecommendations = (recommendations: PredictRecommendation[]) => (
+    <ul>
+      {/* Token: {recommendation.token}, Description: {recommendation.description}, Score: {recommendation.score} */}
+      {recommendations.map((recommendation, index) => (
+        <li key={index}>
+          {recommendation.description}
+        </li>
+      ))}
+    </ul>
+  );
+
+  const renderPredict = (response: PredictResponse) => (
+    <>
+      <div className='col-span-2 font-bold text-lg'>Task Status:</div>
+      <div className='col-span-7'>{response.status}</div>
+
+      <div className='col-span-2 font-bold text-lg'>Recommendations:</div>
+      <div className='col-span-7'>{renderRecommendations(response.result.recommendations)}</div>
+
+      <div className='col-span-2 font-bold text-lg'>Past Interactions:</div>
+      <div className='col-span-7'>{renderInteractions(response.result.past_interactions)}</div>
+    </>
+  );
+
+  if ((response as ErrorResponse).result.error) {
+    return renderErrorResponse(response as ErrorResponse)
+  } else {
+    return renderPredict(response as PredictResponse);
+  }
+};
+
+export const renderEvaluateResponse = (response: EvaluateResponse) => {
+  const renderObject = (obj: object) => (
+    <ul>{Object.entries(obj).map(([key, value]) => <li key={key}>{`${key}: ${JSON.stringify(value)}`}</li>)}</ul>
+  );
+
+  return (
+    <>
+      <div className='col-span-2 font-bold text-lg'>Task Status:</div>
+      <div className='col-span-7'>{response.status}</div>
+
+      <div className='col-span-2 font-bold text-lg'>Metrics:</div>
+      <div className='col-span-7'>{renderObject(response.result)}</div>
+    </>
+  );
+}
+
+export function copyToClipboard(text: string) {
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.log(`Error copying to clipboard: ${error}`);
+    }
+  };
+  return (
+    <span className="toClipboard" onClick={() => copyToClipboard(text)}>{text} <FontAwesomeIcon icon={faClipboard} /></span>
+  )
+}
