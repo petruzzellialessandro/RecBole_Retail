@@ -12,13 +12,17 @@ import os
 
 TRAIN_USER = os.getenv("TRAIN_USERNAME", "admin")
 TRAIN_PASS = os.getenv("TRAIN_PASSWORD", "admin")
+docs_url = "http://localhost:8000/docs"
 
 main = APIRouter()
 
 @main.get("/", tags=["General"], status_code=HTTPStatus.OK)
 def root():
     """ Root endpoint used only as welcome message."""
-    return {"message": "Welcome to RecBole Retail Recommender System! Please, read the `/docs`!"}
+    return {
+        "message": "Welcome to RecBole Retail Recommender System! Please, read the docs!",
+        "docs_url": docs_url
+    }
 
 @main.post("/predict", tags=["Prediction"], status_code=HTTPStatus.ACCEPTED, response_model=TaskStatusResponse)
 async def start_predict_task(user_token: str = Form(...), k: int = Form(10), file: UploadFile = File(...), model: str = Form(...)):

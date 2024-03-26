@@ -32,10 +32,11 @@ const App: React.FC = () => {
       <EvaluateForm btnClass={btnClass} />
       <TrainForm btnClass={btnClass} />
 
-      <div className='flex flex-col justify-center my-20'>
-        <div className='flex justify-center text-md'>This software has been developed for the</div>
-        <div className='flex justify-center font-bold text-lg my-4'>Semantics in Intelligent Information Access Course, Computer Science MSc Degree @UniBA</div>
-        <div className='flex justify-center text-lg'>by Francesco Peragine</div>
+      <div className='flex flex-col justify-center my-20 gap-y-4'>
+        <div className='flex justify-center text-md leading-7'>This software has been developed for the</div>
+        <div className='flex justify-center font-bold text-xl leading-7'>Semantics in Intelligent Information Access Course</div>
+        <div className='flex justify-center font-bold text-md leading-7'>of Computer Science MSc Degree @UniBA</div>
+        <div className='flex justify-center text-lg leading-7'>by Francesco Peragine</div>
       </div>
     </div>
   );

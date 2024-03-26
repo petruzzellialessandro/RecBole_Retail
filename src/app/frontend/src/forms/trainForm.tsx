@@ -90,7 +90,7 @@ export const TrainForm: React.FC<BtnProps> = ({ btnClass }) => {
       {taskResponse && showResponse  && (
         <div className='p-3 grid grid-cols-9 gap-x-4 gap-y-2'>{taskResponse && showResponse ? renderResult(taskResponse) : 'No result available.'}</div>
       )}
-      {message && showResponse && <div className='p-3 font-bold text-lg'>{message}</div>}
+      {message && <div className='p-3 font-bold text-lg'>{message}</div>}
       {taskID && showCheckButton && (
         <button onClick={() => handleCheckResult(taskID, setMessage, setTaskResponse)} className="text-accent-700 hover:underline text-2xl font-bold p-3">Check Result</button>       
       )}
