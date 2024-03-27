@@ -27,7 +27,7 @@ class MakeEmbedding:
         try:
             df_description = pd.read_pickle(os.path.join(self.processed_data_path, "df_products_descriptions.pkl"))
             df = pd.merge(df, df_description, left_on='D_PRODUCT', right_on='name', how='left')
-            df = df[['Key_product', 'D_PRODUCT', 'description_word2vec', 'description_glove', 'Q_AMOUNT', 'K_DITTA', 'hierarchy']]
+            df = df[['Key_product', 'D_PRODUCT', 'description_word2vec', 'Q_AMOUNT', 'K_DITTA', 'hierarchy']]
             has_description = True
         except:
             has_description = False
@@ -48,7 +48,10 @@ class MakeEmbedding:
 
         if has_description:
             df = df.loc[:, ['Key_product', 'hier_embed', 'description_word2vec']]
-            df['tensor_embed'] = df.apply(lambda x: list(np.array(x['hier_embed']) + np.array(x['description_word2vec'])), axis=1)
+            if MERGE_METHOD == 'sum':
+                df['tensor_embed'] = df.apply(lambda x: list(np.array(x['hier_embed']) + np.array(x['description_word2vec'])), axis=1)
+            else:
+                df['tensor_embed'] = df.apply(lambda x: list(np.mean(np.stack((x['hier_embed'], x['description_word2vec'])), axis=0)), axis=1)
         else:
             df = df.loc[:, ['Key_product', 'hier_embed']]
             df['tensor_embed'] = df['hier_embed']
