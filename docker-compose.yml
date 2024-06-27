@@ -30,3 +30,5 @@ services:
       - "3000:3000"
     volumes:
       - ./src/app/frontend:/app/frontend
+    environment:
+      - WATCHPACK_POLLING=true

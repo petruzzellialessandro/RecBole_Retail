@@ -15,7 +15,7 @@ const App: React.FC = () => {
   return (
     <div className="w-4/5 m-auto font-mono">
       <Helmet>
-        <title>RecBole Retail</title>
+        <title>Recommender Retail</title>
       </Helmet>
       <div className='flex flex-row items-center justify-between mt-10 mb-5'>
         <div className='p-5 float float-col'>
@@ -24,19 +24,16 @@ const App: React.FC = () => {
         </div>
         <div className='flex flex-col justify-end me-5 w-44'>
           <span className='flex justify-center text-sm'>Powered by</span>
-          <img src={`${process.env.PUBLIC_URL}/logo.png`} alt="RecBole" className="flex flex-grow" />
+          <img src={`${process.env.PUBLIC_URL}/logo.png`} alt="SWAP" className="flex flex-grow" />
         </div>
       </div>
       <ResultForm btnClass={btnClass} />
       <PredictForm btnClass={btnClass} />
       <EvaluateForm btnClass={btnClass} />
       <TrainForm btnClass={btnClass} />
-
       <div className='flex flex-col justify-center my-20 gap-y-4'>
-        <div className='flex justify-center text-md leading-7'>This software has been developed for the</div>
-        <div className='flex justify-center font-bold text-xl leading-7'>Semantics in Intelligent Information Access Course</div>
-        <div className='flex justify-center font-bold text-md leading-7'>of Computer Science MSc Degree @UniBA</div>
-        <div className='flex justify-center text-lg leading-7'>by Francesco Peragine</div>
+        <div className='flex justify-center text-md leading-7'>This software has been developed by</div>
+        <div className='flex justify-center font-bold text-xl leading-7'>Swap Research Group@UniBA</div>
       </div>
     </div>
   );

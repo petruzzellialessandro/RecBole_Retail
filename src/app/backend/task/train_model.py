@@ -10,5 +10,5 @@ def start_training(model: str) -> None:
     dict_results = run_recbole(model=model, config_file_list=[config_path], dataset='RECEIPT_LINES')
     if not os.path.exists(report_path):
         os.mkdir(report_path)
-    pd.Series(dict(dict_results['test_result'])).to_json(os.path.join(report_path, "{model}_train_evaluation.json"), indent=2)
+    pd.Series(dict(dict_results['test_result'])).to_json(os.path.join(report_path, f"{model}_train_evaluation.json"), indent=2)
     return dict_results['test_result']

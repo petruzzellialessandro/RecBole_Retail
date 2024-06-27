@@ -6,7 +6,7 @@ This project aims to transform the shopping experience in the retail sector thro
 
 ## Getting Started
 
-- Rename the `sample.env` file into `.env` and fill it with your OpenAI account informations. Remember to change the admin credentials to prevent unauthorized access to the traiing process.
+- Rename the `sample.env` file into `.env` and fill it with your OpenAI account information. Remember to change the admin credentials to prevent unauthorized access to the training process.
 - Install Python from [Python Download Link](https://www.python.org/downloads/).
 - Install Docker from [Docker Download Link](https://docs.docker.com/get-docker/).
 - Run the `setup_backend_data.py` script placed in the root folder.

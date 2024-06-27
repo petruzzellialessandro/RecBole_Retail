@@ -6,7 +6,7 @@ from routes import main
 def create_app():
     app = FastAPI(
         title="Recbole Retail",
-        description="Recommendation System for Retail Industry",
+    description='Recommender System Services For Retail Industry.',
         version="1.0"
     )
     app.add_middleware(
